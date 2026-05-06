@@ -22,7 +22,7 @@ export async function POST(
 
     const document = await prisma.document.create({
       data: {
-        caseId: params.id,
+        caseId: id,
         name: file.name,
         type: type, // Data Form, Draft, Final Review, etc.
         url: mockUrl,
