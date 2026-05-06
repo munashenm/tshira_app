@@ -94,7 +94,7 @@ function SettingsTab({ icon, label, active = false }: { icon: React.ReactNode, l
         ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm border border-zinc-200 dark:border-zinc-800" 
         : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800"
     }`}>
-      {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+      {React.cloneElement(icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
       <span className="text-sm font-bold">{label}</span>
     </button>
   );
