@@ -196,7 +196,7 @@ export default async function CaseDetailPage({
   );
 }
 
-function TimelineStep({ status, currentStatus, label, date, user }: { status: CaseStatus, currentStatus: CaseStatus, label: string, date?: string, user?: string }) {
+function TimelineStep({ status, currentStatus, label, date, user }: { status: CaseStatus, currentStatus: CaseStatus, label: string, date?: string, user?: string | null }) {
   const statuses = [
     "RECEIVED_FROM_NYDA", "ASSIGNED_TO_PROVINCE", "ASSIGNED_FOR_DATA_COLLECTION", 
     "DATA_COLLECTION_IN_PROGRESS", "DATA_SUBMITTED", "PROVINCIAL_QUALITY_CHECK",
@@ -235,7 +235,7 @@ function TimelineStep({ status, currentStatus, label, date, user }: { status: Ca
   );
 }
 
-function UserRow({ roleName, role, name, caseId, province }: { roleName: string, role: Role, name?: string, caseId: string, province: string }) {
+function UserRow({ roleName, role, name, caseId, province }: { roleName: string, role: Role, name?: string | null, caseId: string, province: string }) {
   return (
     <div className="flex items-center justify-between group">
       <div>
