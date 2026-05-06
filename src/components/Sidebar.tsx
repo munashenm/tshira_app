@@ -37,6 +37,7 @@ export default function Sidebar() {
         <nav className="space-y-1">
           <SidebarItem icon={<LayoutDashboard />} label="Dashboard" href="/" active={pathname === "/"} />
           <SidebarItem icon={<Briefcase />} label="Work Items" href="/cases" active={pathname.startsWith("/cases")} />
+          <SidebarItem icon={<Users />} label="Clients" href="/clients" active={pathname.startsWith("/clients")} />
           <SidebarItem icon={<CalendarDays />} label="Requisitions" href="/requisitions" active={pathname === "/requisitions"} />
           <SidebarItem icon={<Receipt />} label="Finance" href="/finance" active={pathname === "/finance"} />
           <SidebarItem icon={<Users />} label="Team" href="/team" active={pathname === "/team"} />
