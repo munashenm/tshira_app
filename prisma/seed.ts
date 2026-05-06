@@ -10,10 +10,10 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   // Create an Admin user
   const admin = await prisma.user.upsert({
-    where: { email: "admin@itguysa.co.za" },
+    where: { email: "admin@tshira.co.za" },
     update: {},
     create: {
-      email: "admin@itguysa.co.za",
+      email: "admin@tshira.co.za",
       name: "Head Office Admin",
       role: Role.ADMIN_OFFICER,
       password: "password123", // In a real app, hash this!
