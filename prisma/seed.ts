@@ -1,0 +1,59 @@
+import { PrismaClient, Role, Province } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import path from "path";
+
+const dbPath = path.resolve(process.cwd(), "dev.db");
+const adapter = new PrismaBetterSqlite3({ url: dbPath });
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  // Create an Admin user
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@itguysa.co.za" },
+    update: {},
+    create: {
+      email: "admin@itguysa.co.za",
+      name: "Head Office Admin",
+      role: Role.ADMIN_OFFICER,
+      password: "password123", // In a real app, hash this!
+    },
+  });
+
+  // Create a Provincial Coordinator for Limpopo
+  const coordinator = await prisma.user.upsert({
+    where: { email: "limpopo.coord@itguysa.co.za" },
+    update: {},
+    create: {
+      email: "limpopo.coord@itguysa.co.za",
+      name: "Limpopo Coordinator",
+      role: Role.PROVINCIAL_COORDINATOR,
+      province: Province.LIMPOPO,
+      password: "password123",
+    },
+  });
+
+  // Create a DCO for Limpopo
+  const dco = await prisma.user.upsert({
+    where: { email: "limpopo.dco@itguysa.co.za" },
+    update: {},
+    create: {
+      email: "limpopo.dco@itguysa.co.za",
+      name: "Limpopo DCO",
+      role: Role.DATA_COLLECTION_OFFICER,
+      province: Province.LIMPOPO,
+      password: "password123",
+    },
+  });
+
+  console.log({ admin, coordinator, dco });
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

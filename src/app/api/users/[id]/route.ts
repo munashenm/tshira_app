@@ -1,0 +1,28 @@
+import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { Role, Province } from "@prisma/client";
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const { role, province, active } = body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        role: role as Role,
+        province: province as Province | null,
+        active: active !== undefined ? active : undefined,
+      },
+    });
+
+    return NextResponse.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
+  }
+}

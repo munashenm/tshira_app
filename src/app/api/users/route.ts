@@ -1,0 +1,25 @@
+import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { Role } from "@prisma/client";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const role = searchParams.get("role") as Role;
+
+  try {
+    const users = await prisma.user.findMany({
+      where: role ? { role } : {},
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    return NextResponse.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+  }
+}

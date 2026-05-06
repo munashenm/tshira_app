@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  ADMIN_OFFICER
+  PROVINCIAL_COORDINATOR
+  DATA_COLLECTION_OFFICER
+  BUSINESS_CONSULTANT
+  REVIEWER
+  FINANCE
+}
+
+enum Province {
+  LIMPOPO
+  MPUMALANGA
+  GAUTENG
+  NORTH_WEST
+  FREE_STATE
+  NORTHERN_CAPE
+}
+
+enum CaseStatus {
+  RECEIVED_FROM_NYDA
+  ASSIGNED_TO_PROVINCE
+  ASSIGNED_FOR_DATA_COLLECTION
+  DATA_COLLECTION_IN_PROGRESS
+  DATA_SUBMITTED
+  PROVINCIAL_QUALITY_CHECK
+  RETURNED_FOR_DATA_CORRECTION
+  SUBMITTED_TO_HEAD_OFFICE
+  ASSIGNED_TO_CONSULTANT
+  DOCUMENT_IN_PROGRESS
+  SUBMITTED_FOR_REVIEW
+  RETURNED_TO_CONSULTANT
+  INTERNALLY_REVIEWED
+  SENT_TO_NYDA
+  CLIENT_APPROVED
+  READY_FOR_INVOICING
+  INVOICED
+  PAID
+  CLOSED
+}
+
+enum RequisitionStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  BOOKED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  role          Role      @default(DATA_COLLECTION_OFFICER)
+  province      Province?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignedCoordinatorCases Case[] @relation("AssignedCoordinator")
+  assignedDcoCases         Case[] @relation("AssignedDco")
+  assignedConsultantCases  Case[] @relation("AssignedConsultant")
+  assignedReviewerCases    Case[] @relation("AssignedReviewer")
+
+  requisitions            Requisition[] @relation("RequisitionUser")
+  approvedRequisitions    Requisition[] @relation("ApprovedBy")
+}
+
+model Case {
+  id                  String     @id @default(cuid())
+  nydaReference       String?
+  clientName          String
+  beneficiaryDetails  String?
+  province            Province
+  outputType          String     // Business Plan, Feasibility Study
+  priority            String     @default("NORMAL")
+  status              CaseStatus @default(RECEIVED_FROM_NYDA)
+  receivedAt          DateTime   @default(now())
+  deadline            DateTime?
+  slaDeadline         DateTime?
+  comments            String?
+
+  coordinatorId       String?
+  coordinator         User?      @relation("AssignedCoordinator", fields: [coordinatorId], references: [id])
+  
+  dcoId               String?
+  dco                 User?      @relation("AssignedDco", fields: [dcoId], references: [id])
+  
+  consultantId        String?
+  consultant          User?      @relation("AssignedConsultant", fields: [consultantId], references: [id])
+  
+  reviewerId          String?
+  reviewer            User?      @relation("AssignedReviewer", fields: [reviewerId], references: [id])
+
+  documents           Document[]
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  estimatedCost       Float?
+  actualCost          Float?
+  invoiceNumber       String?
+  invoiceDate         DateTime?
+  paymentStatus       String?
+
+  history             CaseHistory[]
+}
+
+model CaseHistory {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id])
+  status    CaseStatus
+  comments  String?
+  userId    String?
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id])
+  type         String   // Data Form, Draft, Final Review, Proof of Approval
+  name         String
+  url          String
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+}
+
+model Requisition {
+  id            String            @id @default(cuid())
+  province      Province
+  location      String
+  dateTime      DateTime
+  purpose       String
+  isClientVisit Boolean           @default(false)
+  estimatedCost Float?
+  status        RequisitionStatus @default(DRAFT)
+  
+  userId        String
+  user          User              @relation("RequisitionUser", fields: [userId], references: [id])
+  
+  approvedById  String?
+  approvedBy    User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
