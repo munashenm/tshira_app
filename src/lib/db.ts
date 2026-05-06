@@ -11,8 +11,9 @@ const getPrisma = () => {
 
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    console.warn("DATABASE_URL is not set");
-    return new PrismaClient();
+    throw new Error(
+      "DATABASE_URL is not set — database access is not available at build time"
+    );
   }
 
   const pool = new Pool({ connectionString });
