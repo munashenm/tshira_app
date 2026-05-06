@@ -11,9 +11,13 @@ const getPrisma = () => {
 
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error(
-      "DATABASE_URL is not set — database access is not available at build time"
-    );
+    // Return a proxy that throws only when accessed, allowing build-time imports to succeed
+    return new Proxy({} as PrismaClient, {
+      get(_, prop) {
+        if (prop === 'then') return undefined; // Avoid issues with async/await
+        throw new Error(`DATABASE_URL is not set. Cannot access prisma.${String(prop)} during build or without configuration.`);
+      }
+    });
   }
 
   const pool = new Pool({ connectionString });
