@@ -60,7 +60,7 @@ function SidebarItem({ icon, label, href, active = false }: { icon: React.ReactN
           : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50"
       }`}
     >
-      {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+      {React.cloneElement(icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
       <span className="text-sm font-semibold">{label}</span>
     </Link>
   );
