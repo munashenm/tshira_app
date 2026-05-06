@@ -51,7 +51,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
     switch (action) {
       case 'ASSIGN_TO_PROVINCE':
-        return role === Role.ADMIN_OFFICER;
+        return false;
       
       case 'ASSIGN_FOR_DATA_COLLECTION':
         return role === Role.PROVINCIAL_COORDINATOR && caseData?.province === province;
@@ -63,7 +63,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
         return role === Role.PROVINCIAL_COORDINATOR && caseData?.province === province;
       
       case 'ASSIGN_TO_CONSULTANT':
-        return role === Role.ADMIN_OFFICER;
+        return false;
       
       case 'DEVELOP_DOCUMENT':
         return role === Role.BUSINESS_CONSULTANT;
@@ -75,13 +75,13 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
         return role === Role.FINANCE;
 
       case 'CREATE_CASE':
-        return role === Role.ADMIN_OFFICER;
+        return false;
         
       case 'CREATE_REQUISITION':
         return role === Role.PROVINCIAL_COORDINATOR;
         
       case 'APPROVE_REQUISITION':
-        return role === Role.ADMIN_OFFICER;
+        return false;
 
       default:
         return false;
