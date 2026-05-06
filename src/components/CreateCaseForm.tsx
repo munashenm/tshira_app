@@ -1,10 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Briefcase, Calendar, AlertCircle, User, CreditCard, Phone, Mail, MapPin } from "lucide-react";
+import { Plus, X, Briefcase, Calendar, AlertCircle, User, CreditCard, Phone, Mail, MapPin, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function CreateCaseForm({ provinces }: { provinces: string[] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      const res = await fetch("/api/cases", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (res.ok) {
+        setIsOpen(false);
+        router.refresh();
+        router.push("/cases");
+      } else {
+        const error = await res.json();
+        alert(`Error: ${error.error || "Failed to create case"}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!isOpen) {
     return (
@@ -31,7 +62,7 @@ export default function CreateCaseForm({ provinces }: { provinces: string[] }) {
           </button>
         </div>
         
-        <form action="/api/cases" method="POST" className="p-8 space-y-6 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto">
           {/* Section: Client Information */}
           <div className="space-y-4">
             <h3 className="text-xs font-black text-blue-600 uppercase tracking-[0.2em]">Client Information</h3>
@@ -129,8 +160,12 @@ export default function CreateCaseForm({ provinces }: { provinces: string[] }) {
           </div>
 
           <div className="pt-8 flex gap-4 sticky bottom-0 bg-white dark:bg-zinc-900 pb-2">
-            <button type="submit" className="flex-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]">
-              Create Work Item
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="flex-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Work Item"}
             </button>
             <button type="button" onClick={() => setIsOpen(false)} className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 font-bold py-4 rounded-2xl transition-all">
               Cancel

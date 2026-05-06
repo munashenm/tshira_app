@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/", request.url), { status: 303 });
+    return NextResponse.json(newCase);
   } catch (error) {
     console.error("Error creating case:", error);
     return NextResponse.json({ error: "Failed to create case" }, { status: 500 });
