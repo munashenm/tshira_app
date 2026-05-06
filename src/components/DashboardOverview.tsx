@@ -11,6 +11,7 @@ import {
 import CreateCaseForm from "./CreateCaseForm";
 import { Province } from "@prisma/client";
 import Link from "next/link";
+import PendingActions from "./PendingActions";
 
 export default async function DashboardOverview() {
   const stats = await prisma.case.groupBy({
@@ -50,6 +51,18 @@ export default async function DashboardOverview() {
 
   const pendingCollection = (statusCounts['ASSIGNED_FOR_DATA_COLLECTION'] || 0) + (statusCounts['DATA_COLLECTION_IN_PROGRESS'] || 0);
   const pendingReview = (statusCounts['PROVINCIAL_QUALITY_CHECK'] || 0) + (statusCounts['SUBMITTED_FOR_REVIEW'] || 0);
+  const pendingAssignment = (statusCounts['RECEIVED_FROM_NYDA'] || 0) + (statusCounts['SUBMITTED_TO_HEAD_OFFICE'] || 0);
+  const pendingConsultation = (statusCounts['ASSIGNED_TO_CONSULTANT'] || 0) + (statusCounts['RETURNED_TO_CONSULTANT'] || 0);
+  const pendingInvoicing = (statusCounts['CLIENT_APPROVED'] || 0) + (statusCounts['READY_FOR_INVOICING'] || 0);
+
+  const roleCounts = {
+    ADMIN_OFFICER: pendingAssignment,
+    PROVINCIAL_COORDINATOR: (statusCounts['ASSIGNED_TO_PROVINCE'] || 0) + (statusCounts['PROVINCIAL_QUALITY_CHECK'] || 0),
+    DATA_COLLECTION_OFFICER: pendingCollection,
+    BUSINESS_CONSULTANT: pendingConsultation,
+    REVIEWER: (statusCounts['SUBMITTED_FOR_REVIEW'] || 0),
+    FINANCE: pendingInvoicing
+  };
 
   return (
     <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
@@ -66,6 +79,8 @@ export default async function DashboardOverview() {
           </div>
         </div>
       </div>
+
+      <PendingActions counts={roleCounts} />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">

@@ -26,9 +26,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     <div className="flex min-h-screen">
       <DemoRoleSwitcher />
       <Sidebar />
-      <div className="flex-1 overflow-x-hidden">
-        {children}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <TopNav />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
 }
+
+import TopNav from "./TopNav";
