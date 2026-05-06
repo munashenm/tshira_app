@@ -10,7 +10,18 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { status, coordinatorId, dcoId, consultantId, reviewerId, comments } = body;
+    const { 
+      status, 
+      coordinatorId, 
+      dcoId, 
+      consultantId, 
+      reviewerId, 
+      comments,
+      beneficiaryDetails,
+      invoiceNumber,
+      invoiceDate,
+      actualCost
+    } = body;
 
     const updatedCase = await prisma.case.update({
       where: { id },
@@ -21,6 +32,10 @@ export async function PATCH(
         consultantId,
         reviewerId,
         comments,
+        beneficiaryDetails,
+        invoiceNumber,
+        invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
+        actualCost,
         history: status ? {
           create: {
             status: status as CaseStatus,

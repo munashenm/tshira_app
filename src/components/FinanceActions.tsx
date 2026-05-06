@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, FileText, Receipt } from "lucide-react";
+import { ArrowRight, CheckCircle2, FileText, Receipt, X, Save } from "lucide-react";
 import { CaseStatus, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useSimulation } from "@/lib/SimulationContext";
@@ -14,10 +14,16 @@ export default function FinanceActions({
   status: CaseStatus;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+  const [invoiceDetails, setInvoiceDetails] = useState({
+    invoiceNumber: "",
+    actualCost: ""
+  });
+  
   const router = useRouter();
   const { currentPersona } = useSimulation();
 
-  const handleUpdate = async (newStatus: CaseStatus) => {
+  const handleUpdate = async (newStatus: CaseStatus, extraData: any = {}) => {
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/cases/${caseId}`, {
@@ -25,10 +31,12 @@ export default function FinanceActions({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           status: newStatus,
-          comments: `Finance update: Moved to ${newStatus}`
+          comments: `Finance update: Moved to ${newStatus}`,
+          ...extraData
         }),
       });
       if (res.ok) {
+        setShowInvoiceForm(false);
         router.refresh();
       }
     } catch (error) {
@@ -43,7 +51,7 @@ export default function FinanceActions({
   if (!isFinance) return null;
 
   return (
-    <div className="flex justify-end gap-2">
+    <div className="flex justify-end gap-2 relative">
       {status === "CLIENT_APPROVED" && (
         <button 
           onClick={() => handleUpdate(CaseStatus.READY_FOR_INVOICING)}
@@ -54,9 +62,10 @@ export default function FinanceActions({
           <ArrowRight className="w-3 h-3" />
         </button>
       )}
-      {status === "READY_FOR_INVOICING" && (
+
+      {status === "READY_FOR_INVOICING" && !showInvoiceForm && (
         <button 
-          onClick={() => handleUpdate(CaseStatus.INVOICED)}
+          onClick={() => setShowInvoiceForm(true)}
           disabled={isSubmitting}
           className="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1"
         >
@@ -64,6 +73,44 @@ export default function FinanceActions({
           <Receipt className="w-3 h-3" />
         </button>
       )}
+
+      {showInvoiceForm && (
+        <div className="absolute right-0 bottom-full mb-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 animate-in slide-in-from-bottom-2">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Invoice Details</h4>
+            <button onClick={() => setShowInvoiceForm(false)} className="p-1 hover:bg-zinc-100 rounded-full">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-3">
+            <input 
+              placeholder="Invoice Number" 
+              value={invoiceDetails.invoiceNumber}
+              onChange={(e) => setInvoiceDetails({...invoiceDetails, invoiceNumber: e.target.value})}
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-3 py-2 text-xs"
+            />
+            <input 
+              type="number"
+              placeholder="Amount (ZAR)" 
+              value={invoiceDetails.actualCost}
+              onChange={(e) => setInvoiceDetails({...invoiceDetails, actualCost: e.target.value})}
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-3 py-2 text-xs"
+            />
+            <button 
+              onClick={() => handleUpdate(CaseStatus.INVOICED, { 
+                invoiceNumber: invoiceDetails.invoiceNumber, 
+                actualCost: parseFloat(invoiceDetails.actualCost),
+                invoiceDate: new Date()
+              })}
+              className="w-full bg-blue-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2"
+            >
+              <Save className="w-3 h-3" />
+              Finalize Invoice
+            </button>
+          </div>
+        </div>
+      )}
+
       {status === "INVOICED" && (
         <button 
           onClick={() => handleUpdate(CaseStatus.PAID)}
@@ -74,6 +121,7 @@ export default function FinanceActions({
           <CheckCircle2 className="w-3 h-3" />
         </button>
       )}
+
       {status === "PAID" && (
         <button 
           onClick={() => handleUpdate(CaseStatus.CLOSED)}

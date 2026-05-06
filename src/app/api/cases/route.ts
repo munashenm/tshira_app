@@ -8,14 +8,24 @@ export async function POST(request: Request) {
     const nydaReference = formData.get("nydaReference") as string;
     const clientName = formData.get("clientName") as string;
     const province = formData.get("province") as Province;
-    const outputType = formData.get("outputType") as string;
+    const priority = (formData.get("priority") as string) || "NORMAL";
+    const deadlineStr = formData.get("deadline") as string;
+    const beneficiaryDetails = formData.get("beneficiaryDetails") as string;
+    
+    const deadline = deadlineStr ? new Date(deadlineStr) : null;
+    const slaDeadline = new Date();
+    slaDeadline.setDate(slaDeadline.getDate() + 7); // Default 7-day SLA
 
     const newCase = await prisma.case.create({
       data: {
         nydaReference,
         clientName,
+        beneficiaryDetails,
         province,
         outputType,
+        priority,
+        deadline,
+        slaDeadline,
         status: "RECEIVED_FROM_NYDA",
       },
     });

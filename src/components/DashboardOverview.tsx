@@ -41,6 +41,16 @@ export default async function DashboardOverview() {
     return acc;
   }, {} as Record<string, number>);
 
+  const overdueCount = await prisma.case.count({
+    where: {
+      slaDeadline: { lt: new Date() },
+      status: { notIn: ['CLOSED', 'PAID'] }
+    }
+  });
+
+  const pendingCollection = (statusCounts['ASSIGNED_FOR_DATA_COLLECTION'] || 0) + (statusCounts['DATA_COLLECTION_IN_PROGRESS'] || 0);
+  const pendingReview = (statusCounts['PROVINCIAL_QUALITY_CHECK'] || 0) + (statusCounts['SUBMITTED_FOR_REVIEW'] || 0);
+
   return (
     <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <div className="flex justify-between items-end">
@@ -58,7 +68,7 @@ export default async function DashboardOverview() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard 
           title="Received Work" 
           value={statusCounts['RECEIVED_FROM_NYDA'] || 0} 
@@ -67,13 +77,13 @@ export default async function DashboardOverview() {
         />
         <StatCard 
           title="Data Collection" 
-          value={(statusCounts['ASSIGNED_FOR_DATA_COLLECTION'] || 0) + (statusCounts['DATA_COLLECTION_IN_PROGRESS'] || 0)} 
+          value={pendingCollection} 
           icon={<Clock className="w-5 h-5" />}
           color="orange"
         />
         <StatCard 
           title="Quality Review" 
-          value={(statusCounts['PROVINCIAL_QUALITY_CHECK'] || 0) + (statusCounts['SUBMITTED_FOR_REVIEW'] || 0)} 
+          value={pendingReview} 
           icon={<AlertCircle className="w-5 h-5" />}
           color="purple"
         />
@@ -82,6 +92,12 @@ export default async function DashboardOverview() {
           value={statusCounts['CLIENT_APPROVED'] || 0} 
           icon={<CheckCircle2 className="w-5 h-5" />}
           color="green"
+        />
+        <StatCard 
+          title="Overdue (SLA)" 
+          value={overdueCount} 
+          icon={<AlertCircle className="w-5 h-5" />}
+          color="red"
         />
       </div>
 
@@ -150,6 +166,7 @@ function StatCard({ title, value, icon, color }: { title: string, value: number,
     orange: "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30",
     purple: "bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900/30",
     green: "bg-green-50 text-green-600 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30",
+    red: "bg-red-50 text-red-600 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30",
   };
 
   return (

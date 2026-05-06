@@ -19,6 +19,7 @@ import StatusUpdateModal from "@/components/StatusUpdateModal";
 import UserAssignmentModal from "@/components/UserAssignmentModal";
 import ReviewModal from "@/components/ReviewModal";
 import UploadDocumentModal from "@/components/UploadDocumentModal";
+import DataCollectionForm from "@/components/DataCollectionForm";
 
 export default async function CaseDetailPage({
   params,
@@ -93,10 +94,15 @@ export default async function CaseDetailPage({
                 user={c.coordinator?.name}
               />
               <TimelineStep 
+                status="ASSIGNED_FOR_DATA_COLLECTION" 
+                currentStatus={c.status} 
+                label="Fieldwork Dispatched" 
+                user={c.dco?.name}
+              />
+              <TimelineStep 
                 status="DATA_SUBMITTED" 
                 currentStatus={c.status} 
-                label="Fieldwork & Data Collection" 
-                user={c.dco?.name}
+                label="Data Submitted & Quality Check" 
               />
               <TimelineStep 
                 status="ASSIGNED_TO_CONSULTANT" 
@@ -105,12 +111,28 @@ export default async function CaseDetailPage({
                 user={c.consultant?.name}
               />
               <TimelineStep 
+                status="SUBMITTED_FOR_REVIEW" 
+                currentStatus={c.status} 
+                label="Quality Assurance Review" 
+                user={c.reviewer?.name}
+              />
+              <TimelineStep 
                 status="CLIENT_APPROVED" 
                 currentStatus={c.status} 
-                label="Client Approval (NYDA)" 
+                label="NYDA System Approval" 
               />
-            </div>
+              <TimelineStep 
+                status="INVOICED" 
+                currentStatus={c.status} 
+                label="Finance & Invoicing" 
+              />
           </div>
+
+          <DataCollectionForm 
+            caseId={c.id} 
+            currentStatus={c.status} 
+            initialData={c.beneficiaryDetails} 
+          />
 
           {/* Document Section */}
           <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
