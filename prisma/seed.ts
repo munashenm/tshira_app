@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient, Role, Province } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -45,7 +46,7 @@ async function main() {
     },
   });
 
-  console.log({ admin, coordinator, dco });
+  console.log("Seeding successful:", { admin: admin.email, coordinator: coordinator.email, dco: dco.email });
 }
 
 main()
