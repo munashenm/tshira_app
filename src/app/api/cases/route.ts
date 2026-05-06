@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const nydaReference = formData.get("nydaReference") as string;
     const clientName = formData.get("clientName") as string;
     const province = formData.get("province") as Province;
+    const outputType = formData.get("outputType") as string;
     const priority = (formData.get("priority") as string) || "NORMAL";
     const deadlineStr = formData.get("deadline") as string;
     const beneficiaryDetails = formData.get("beneficiaryDetails") as string;
