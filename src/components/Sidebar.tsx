@@ -11,11 +11,18 @@ import {
   Receipt
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("tshira_auth");
+    router.push("/login");
+  };
 
   return (
     <aside className="w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col h-screen sticky top-0">
@@ -40,7 +47,10 @@ export default function Sidebar() {
       <div className="mt-auto p-8 border-t border-zinc-100 dark:border-zinc-800">
         <nav className="space-y-1">
           <SidebarItem icon={<Settings />} label="Settings" href="/settings" active={pathname === "/settings"} />
-          <button className="w-full flex items-center gap-4 px-4 py-3 text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-all">
+          <button 
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-4 px-4 py-3 text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-all"
+          >
             <LogOut className="w-5 h-5" />
             <span className="text-sm font-semibold">Sign Out</span>
           </button>

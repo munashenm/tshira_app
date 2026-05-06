@@ -19,15 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased bg-zinc-50 dark:bg-zinc-950 flex`}>
+      <body className={`${inter.className} antialiased bg-zinc-50 dark:bg-zinc-950`}>
         <SimulationProvider>
-          <DemoRoleSwitcher />
-          <Sidebar />
-          <div className="flex-1 overflow-x-hidden">
-            {children}
-          </div>
+          <LayoutClient>{children}</LayoutClient>
         </SimulationProvider>
       </body>
     </html>
   );
 }
+
+import LayoutClient from "@/components/LayoutClient";
