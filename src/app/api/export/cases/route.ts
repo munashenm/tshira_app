@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const cases = await prisma.case.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { coordinator: true, consultant: true }
+    include: { coordinator: true, consultant: true, client: true }
   });
 
   const headers = [
@@ -18,7 +18,7 @@ export async function GET() {
   const rows = cases.map(c => [
     c.nydaReference || '',
     c.clientName,
-    c.clientIdNumber || '',
+    c.client?.idNumber || '',
     c.outputType,
     c.province,
     c.status,

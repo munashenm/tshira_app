@@ -15,7 +15,6 @@ export async function GET(request: Request) {
         OR: [
           { clientName: { contains: q, mode: "insensitive" } },
           { nydaReference: { contains: q, mode: "insensitive" } },
-          { province: { contains: q, mode: "insensitive" } },
         ],
       },
       take: 6,
