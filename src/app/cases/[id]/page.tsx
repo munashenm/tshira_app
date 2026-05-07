@@ -22,6 +22,7 @@ import UploadDocumentModal from "@/components/UploadDocumentModal";
 import DataCollectionForm from "@/components/DataCollectionForm";
 import CaseTabs from "@/components/CaseTabs";
 import GenerateDraftButton from "@/components/GenerateDraftButton";
+import PrintButton from "@/components/PrintButton";
 
 export default async function CaseDetailPage({
   params,
@@ -89,13 +90,7 @@ export default async function CaseDetailPage({
         </div>
         <div className="flex gap-3">
           <GenerateDraftButton caseId={c.id} />
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all group shadow-lg shadow-zinc-800/20"
-          >
-            <FileText className="w-4 h-4 text-zinc-400 group-hover:text-white" />
-            Export Dossier
-          </button>
+          <PrintButton />
           <ReviewModal caseId={c.id} currentStatus={c.status} />
           <StatusUpdateModal caseId={c.id} currentStatus={c.status} province={c.province} />
         </div>
