@@ -82,30 +82,29 @@ export default function InvoicePage() {
             <MessageCircle className="w-4 h-4" /> WhatsApp
           </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/30">
-            <Printer className="w-4 h-4" /> Print / PDF
+            <Printer className="w-4 h-4" /> Download / Print Invoice
           </button>
         </div>
       </div>
 
       {/* Invoice Document */}
-      <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden print:shadow-none print:rounded-none">
+      <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden print:shadow-none print:rounded-none print:m-0">
         {/* Header */}
-        <div className="bg-zinc-900 text-white px-12 py-10 flex justify-between items-start flex-wrap gap-6">
+        <div className="bg-zinc-900 text-white px-12 py-10 flex justify-between items-start flex-wrap gap-6 print:bg-zinc-900 print:text-white" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' } as any}>
           <div className="space-y-3">
-            {s?.orgLogoUrl ? (
+            {s?.orgLogoUrl || true ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.orgLogoUrl} alt={s.orgName} className="h-14 object-contain mb-2" onError={(e) => (e.currentTarget.style.display = 'none')} />
+              <img src={s?.orgLogoUrl || "/logo.png"} alt={s?.orgName || "Logo"} className="h-16 object-contain mb-2" />
             ) : (
               <div className="flex items-center gap-3 mb-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Tshira Logo" className="h-14 object-contain" />
+                <Briefcase className="w-10 h-10 text-blue-500" />
               </div>
             )}
             <div>
-              <p className="text-xl font-black tracking-tight">{s?.orgName || "Tshira Management Systems"}</p>
-              <p className="text-zinc-400 text-xs">NYDA Contracted Service Provider</p>
+              <p className="text-xl font-black tracking-tight">{s?.orgName || "Tshira Emporium"}</p>
+              <p className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold">NYDA Contracted Service Provider</p>
             </div>
-            <div className="text-sm text-zinc-400 space-y-0.5 pt-1">
+            <div className="text-[11px] text-zinc-400 space-y-0.5 pt-1">
               {s?.orgAddress && <p>{s.orgAddress}</p>}
               {s?.orgEmail && <p>{s.orgEmail}</p>}
               {s?.orgPhone && <p>{s.orgPhone}</p>}
@@ -114,7 +113,7 @@ export default function InvoicePage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-zinc-400 text-xs font-black uppercase tracking-widest mb-2">Invoice</p>
+            <p className="text-zinc-400 text-xs font-black uppercase tracking-widest mb-2">Tax Invoice</p>
             <p className="text-5xl font-black text-white">{data.invoiceNumber || "DRAFT"}</p>
             <div className="mt-4 space-y-1 text-sm">
               <div className="flex justify-between gap-8"><span className="text-zinc-400">Date:</span><span className="font-bold">{invoiceDate.toLocaleDateString("en-ZA", { dateStyle: "long" })}</span></div>
@@ -147,7 +146,7 @@ export default function InvoicePage() {
                 ["Deliverable", data.outputType.replace(/_/g, " ")],
                 ...(data.coordinator ? [["Coordinator", data.coordinator.name]] : []),
               ].map(([k, v]) => (
-                <div key={k} className="flex justify-between"><span className="text-zinc-400">{k}</span><span className="font-bold text-zinc-900">{v}</span></div>
+                <div key={k} className="flex justify-between text-[13px]"><span className="text-zinc-400">{k}</span><span className="font-bold text-zinc-900">{v}</span></div>
               ))}
             </div>
           </div>
@@ -167,40 +166,35 @@ export default function InvoicePage() {
               <tr className="border-b border-zinc-100">
                 <td className="py-6">
                   <p className="font-bold text-zinc-900">NYDA {data.outputType.replace(/_/g, " ")} Development Services</p>
-                  <p className="text-sm text-zinc-500 mt-1">Professional services for {client?.name || data.clientName}: data collection, document development, quality review, and NYDA submission.</p>
+                  <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed max-w-lg">Professional services for {client?.name || data.clientName}: data collection, document development, quality review, and NYDA submission.</p>
                 </td>
                 <td className="py-6 text-right text-sm font-bold text-zinc-700">1</td>
-                <td className="py-6 text-right font-bold text-zinc-900 text-lg">R {amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
+                <td className="py-6 text-right font-bold text-zinc-900 text-lg whitespace-nowrap">R {amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
               </tr>
             </tbody>
           </table>
 
           <div className="flex justify-end mt-8">
             <div className="w-72 space-y-3">
-              <div className="flex justify-between text-sm"><span className="text-zinc-400">Subtotal</span><span className="font-bold">R {amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-zinc-400">VAT {s?.invoiceVatNumber ? "(15%)" : "(0% — Exempt)"}</span><span className="font-bold">R 0.00</span></div>
+              <div className="flex justify-between text-[13px]"><span className="text-zinc-400">Subtotal</span><span className="font-bold">R {amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between text-[13px]"><span className="text-zinc-400">VAT {s?.invoiceVatNumber ? "(15%)" : "(0% — Exempt)"}</span><span className="font-bold">R 0.00</span></div>
               <div className="border-t-2 border-zinc-900 pt-4 flex justify-between items-center">
                 <span className="text-lg font-black text-zinc-900">TOTAL DUE</span>
                 <span className="text-2xl font-black text-blue-600">R {amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</span>
               </div>
-              {data.status === "PAID" && (
-                <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-xl py-3 text-center">
-                  <span className="text-emerald-700 font-black text-sm uppercase tracking-widest">✓ Paid in Full</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
         {/* Banking */}
         {(s?.invoiceBankName || s?.invoiceBankAccount) && (
-          <div className="px-12 py-8 bg-zinc-50 border-t border-zinc-100">
+          <div className="px-12 py-8 bg-zinc-50 border-t border-zinc-100 print:bg-zinc-50" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' } as any}>
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Banking Details</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              {s.invoiceBankName && <div><p className="text-zinc-400">Bank</p><p className="font-bold text-zinc-900">{s.invoiceBankName}</p></div>}
-              {s.invoiceBankAccount && <div><p className="text-zinc-400">Account</p><p className="font-bold text-zinc-900">{s.invoiceBankAccount}</p></div>}
-              {s.invoiceBranchCode && <div><p className="text-zinc-400">Branch</p><p className="font-bold text-zinc-900">{s.invoiceBranchCode}</p></div>}
-              {s.invoiceAccountType && <div><p className="text-zinc-400">Type</p><p className="font-bold text-zinc-900">{s.invoiceAccountType}</p></div>}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[13px]">
+              {s.invoiceBankName && <div><p className="text-zinc-400 text-[10px] uppercase font-bold">Bank</p><p className="font-bold text-zinc-900">{s.invoiceBankName}</p></div>}
+              {s.invoiceBankAccount && <div><p className="text-zinc-400 text-[10px] uppercase font-bold">Account</p><p className="font-bold text-zinc-900">{s.invoiceBankAccount}</p></div>}
+              {s.invoiceBranchCode && <div><p className="text-zinc-400 text-[10px] uppercase font-bold">Branch</p><p className="font-bold text-zinc-900">{s.invoiceBranchCode}</p></div>}
+              {s.invoiceAccountType && <div><p className="text-zinc-400 text-[10px] uppercase font-bold">Type</p><p className="font-bold text-zinc-900">{s.invoiceAccountType}</p></div>}
             </div>
             <p className="text-xs text-zinc-400 mt-4">Reference: <strong className="text-zinc-700">{data.invoiceNumber || id.slice(0, 10)}</strong></p>
           </div>
@@ -210,22 +204,25 @@ export default function InvoicePage() {
         {s?.invoiceTerms && (
           <div className="px-12 py-6 border-t border-zinc-100">
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Terms & Conditions</p>
-            <p className="text-xs text-zinc-500 leading-relaxed">{s.invoiceTerms}</p>
+            <p className="text-[10px] text-zinc-500 leading-relaxed italic">{s.invoiceTerms}</p>
           </div>
         )}
         <div className="px-12 py-6 border-t border-zinc-100 text-center">
           <p className="text-xs text-zinc-400">{s?.invoiceNotes || "Thank you for your business."}</p>
-          <p className="text-[10px] text-zinc-300 mt-1">Generated {new Date().toLocaleString()} · This is a computer-generated invoice.</p>
+          <p className="text-[10px] text-zinc-300 mt-1 uppercase tracking-tighter">Generated {new Date().toLocaleString()} · This is a computer-generated tax invoice.</p>
         </div>
       </div>
 
       <style>{`
         @media print {
-          body { background: white !important; margin: 0; }
+          body { background: white !important; margin: 0; padding: 0 !important; }
           .print\\:hidden { display: none !important; }
-          .max-w-4xl { max-width: 100% !important; }
+          .max-w-4xl { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
           .py-8, .px-4 { padding: 0 !important; }
           .bg-zinc-100 { background: white !important; }
+          .shadow-2xl { box-shadow: none !important; }
+          .rounded-3xl { border-radius: 0 !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}</style>
     </div>
