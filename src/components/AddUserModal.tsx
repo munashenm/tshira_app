@@ -11,7 +11,7 @@ export default function AddUserModal() {
     name: "",
     email: "",
     password: "password123", // Default for demo
-    role: Role.DATA_COLLECTION_OFFICER,
+    role: Role.DATA_COLLECTION_OFFICER as Role,
     province: "" as Province | ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,8 +35,8 @@ export default function AddUserModal() {
             name: "",
             email: "",
             password: "password123",
-            role: Role.DATA_COLLECTION_OFFICER,
-            province: ""
+            role: Role.DATA_COLLECTION_OFFICER as Role,
+            province: "" as Province | ""
         });
         router.refresh();
       } else {
