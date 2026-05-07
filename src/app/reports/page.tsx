@@ -63,7 +63,14 @@ export default async function ReportsPage() {
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all"
           >
             <User className="w-4 h-4" />
-            DCO Client List
+            DCO List
+          </Link>
+          <Link
+            href="/reports/coordinator"
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-purple-500/20 transition-all"
+          >
+            <BarChart3 className="w-4 h-4" />
+            PC Recording
           </Link>
           <a
             href="/api/export/cases"
