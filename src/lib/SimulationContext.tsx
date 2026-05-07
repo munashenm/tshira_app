@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Role, Province } from '@prisma/client';
 
 export interface Persona {
+  id: string;
   name: string;
   role: Role;
   province?: Province | null;
@@ -25,7 +26,8 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     if (saved) {
       setCurrentPersona(JSON.parse(saved));
     } else {
-      const defaultPersona = {
+      const defaultPersona: Persona = {
+        id: "default-admin",
         name: "Super Admin",
         role: Role.ADMIN_OFFICER,
         province: null
