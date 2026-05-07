@@ -19,6 +19,7 @@ import { Province, CaseStatus, Role } from "@prisma/client";
 import Link from "next/link";
 import { useSimulation } from "@/lib/SimulationContext";
 import CreateCaseForm from "./CreateCaseForm";
+import ProcessFlowVisualizer from "./ProcessFlowVisualizer";
 
 interface DashboardStats {
   totalCases: number;
@@ -120,6 +121,8 @@ export default function DashboardOverview() {
         <StatCard title="In Review" value={data.statusCounts['PROVINCIAL_QUALITY_CHECK'] || 0} icon={<CheckCircle2 />} color="purple" />
         <StatCard title="Overdue" value={data.overdueCount} icon={<AlertCircle />} color="red" />
       </div>
+
+      <ProcessFlowVisualizer />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: My Tasks + Distribution */}

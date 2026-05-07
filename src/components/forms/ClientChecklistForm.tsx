@@ -24,8 +24,10 @@ const DOCUMENTS = [
   "Tax clearance",
   "Fica document for the business",
   "Fica document for the client",
-  "3 comparable quotations",
-  "Financial statement/ management account"
+  "CV of the client",
+  "Financial statement/ management account",
+  "3 months bank statement",
+  "3 comparable quotations"
 ];
 
 export default function ClientChecklistForm({ caseId, initialData, onSave }: ClientChecklistFormProps) {
