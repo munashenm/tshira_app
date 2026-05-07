@@ -33,10 +33,18 @@ export default async function DashboardOverview() {
   const recentCases = await prisma.case.findMany({
     take: 5,
     orderBy: { createdAt: 'desc' },
-    include: { dco: true }
+    include: { dco: true },
+    where: { status: { notIn: ['CLOSED', 'PAID'] } }
   });
   
-  // Mapping statuses to simplified categories
+  // SLA approaching (within 48h)
+  const twoDays = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+  const approachingSlaCount = await prisma.case.count({
+    where: {
+      slaDeadline: { lte: twoDays, gt: new Date() },
+      status: { notIn: ['CLOSED', 'PAID'] }
+    }
+  });
   const statusCounts = stats.reduce((acc, curr) => {
     acc[curr.status] = curr._count.id;
     return acc;
@@ -79,6 +87,17 @@ export default async function DashboardOverview() {
           </div>
         </div>
       </div>
+
+      {/* SLA Alert Banner */}
+      {approachingSlaCount > 0 && (
+        <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/30 rounded-2xl px-6 py-4 flex items-center gap-4">
+          <AlertCircle className="w-5 h-5 text-orange-500 shrink-0" />
+          <p className="text-sm font-bold text-orange-700 dark:text-orange-400">
+            {approachingSlaCount} case{approachingSlaCount > 1 ? 's' : ''} approaching SLA deadline within 48 hours — prioritise immediately.
+          </p>
+          <Link href="/cases" className="ml-auto text-xs font-black text-orange-600 hover:underline">View →</Link>
+        </div>
+      )}
 
       <PendingActions counts={roleCounts} />
 
@@ -166,9 +185,9 @@ export default async function DashboardOverview() {
               <p className="text-sm text-zinc-500 text-center py-4">No active work items found.</p>
             )}
           </div>
-          <button className="w-full mt-8 py-3 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors">
-            View All Work Items
-          </button>
+          <Link href="/cases" className="w-full mt-8 py-3 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-center block">
+            View All Work Items →
+          </Link>
         </div>
       </div>
     </div>

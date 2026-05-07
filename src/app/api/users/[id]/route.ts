@@ -9,14 +9,15 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { role, province, active } = body;
+    const { role, province, active, password } = body;
 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        role: role as Role,
-        province: province as Province | null,
-        active: active !== undefined ? active : undefined,
+        ...(role !== undefined && { role: role as Role }),
+        ...(province !== undefined && { province: province as Province | null }),
+        ...(active !== undefined && { active }),
+        ...(password !== undefined && { password }),
       },
     });
 

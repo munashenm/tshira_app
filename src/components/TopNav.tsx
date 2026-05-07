@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, Search, User, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { useRouter } from "next/navigation";
+import GlobalSearch from "./GlobalSearch";
 
 export default function TopNav() {
   const { currentPersona } = useSimulation();
@@ -12,31 +13,26 @@ export default function TopNav() {
 
   const handleSignOut = () => {
     localStorage.removeItem("tshira_auth");
+    localStorage.removeItem("demo_persona");
     router.push("/login");
   };
 
   const notifications = [
     { id: 1, title: "New Case Assigned", message: "You have been assigned to NYDA-2024-001", time: "2m ago", unread: true },
-    { id: 2, title: "Document Returned", message: "Business Plan for John Doe was returned for correction", time: "1h ago", unread: true },
-    { id: 3, title: "SLA Warning", message: "Case #882 is approaching its SLA deadline", time: "3h ago", unread: false },
+    { id: 2, title: "Document Returned", message: "Business Plan was returned for correction", time: "1h ago", unread: true },
+    { id: 3, title: "SLA Warning", message: "A case is approaching its SLA deadline", time: "3h ago", unread: false },
   ];
 
   return (
-    <header className="h-20 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-40 px-8 flex items-center justify-between">
-      <div className="flex items-center gap-4 w-1/3">
-        <div className="relative w-full max-w-md group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
-          <input 
-            placeholder="Search cases, beneficiaries, or reports..." 
-            className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-          />
-        </div>
+    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between gap-4">
+      <div className="flex-1 max-w-lg">
+        <GlobalSearch />
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         {/* Notification Bell */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all relative"
           >
@@ -70,14 +66,21 @@ export default function TopNav() {
         </div>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-6 border-l border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center gap-3 pl-4 border-l border-zinc-100 dark:border-zinc-800">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{currentPersona?.name}</p>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{currentPersona?.role.replace(/_/g, ' ')}</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{currentPersona?.name || "Loading..."}</p>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{currentPersona?.role?.replace(/_/g, ' ')}</p>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-            {currentPersona?.name?.charAt(0)}
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-sm">
+            {currentPersona?.name?.charAt(0) || "?"}
           </div>
+          <button
+            onClick={handleSignOut}
+            title="Sign Out"
+            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
