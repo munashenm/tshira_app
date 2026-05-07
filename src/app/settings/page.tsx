@@ -7,7 +7,7 @@ import {
   Receipt, Building, CreditCard, FileText, Image, AlertTriangle
 } from "lucide-react";
 
-type Tab = "general" | "invoice" | "notifications" | "security" | "workflow" | "data";
+type Tab = "general" | "invoice" | "notifications" | "security" | "workflow" | "data" | "logs";
 
 interface Settings {
   orgName: string; orgEmail: string; orgPhone: string; orgAddress: string;
@@ -89,6 +89,7 @@ export default function SettingsPage() {
     { id: "workflow", icon: <Clock />, label: "Workflow & SLA" },
     { id: "security", icon: <Shield />, label: "Security" },
     { id: "data", icon: <Database />, label: "Data" },
+    { id: "logs", icon: <Clock />, label: "System Logs" },
   ];
 
   const nextInvoice = `${settings.invoicePrefix}-${new Date().getFullYear()}-${String(settings.invoiceSequence).padStart(4, "0")}`;
@@ -327,6 +328,14 @@ export default function SettingsPage() {
             </div>
           )}
 
+          {/* ── SYSTEM LOGS ── */}
+          {activeTab === "logs" && (
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Activity className="w-5 h-5 text-emerald-500" /> System Audit Trail</h3>
+              <SystemLogsView />
+            </div>
+          )}
+
         </div>
       </div>
     </div>
@@ -383,6 +392,48 @@ function StatusRow({ label, detail, badge, color }: { label: string; detail: str
         <p className="text-xs text-zinc-500 mt-0.5">{detail}</p>
       </div>
       <span className={`text-xs font-bold px-3 py-1 rounded-full ${color === "green" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>{badge}</span>
+    </div>
+  );
+}
+
+import { Activity } from "lucide-react";
+
+function SystemLogsView() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/activity")
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d)) setLogs(d); })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="py-12 text-center text-zinc-400 font-bold uppercase tracking-widest text-xs">Fetching Logs...</div>;
+
+  return (
+    <div className="space-y-6">
+      {logs.map((log) => (
+        <div key={log.id} className="flex gap-4 p-4 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800">
+          <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 shrink-0">
+            <Activity className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start">
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                <span className="text-blue-600 dark:text-blue-400">{log.user?.name || "System"}</span> 
+                {" marked "}
+                <span className="text-zinc-600 dark:text-zinc-400">"{log.case.clientName}"</span>
+                {" as "}
+                <span className="text-emerald-600 font-black">{log.status.replace(/_/g, ' ')}</span>
+              </p>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{new Date(log.createdAt).toLocaleString()}</span>
+            </div>
+            {log.comments && <p className="text-xs text-zinc-500 mt-1 italic">"{log.comments}"</p>}
+          </div>
+        </div>
+      ))}
+      {logs.length === 0 && <p className="text-center py-12 text-zinc-400">No system activity recorded yet.</p>}
     </div>
   );
 }

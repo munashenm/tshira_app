@@ -21,6 +21,7 @@ import ReviewModal from "@/components/ReviewModal";
 import UploadDocumentModal from "@/components/UploadDocumentModal";
 import DataCollectionForm from "@/components/DataCollectionForm";
 import CaseTabs from "@/components/CaseTabs";
+import GenerateDraftButton from "@/components/GenerateDraftButton";
 
 export default async function CaseDetailPage({
   params,
@@ -73,6 +74,7 @@ export default async function CaseDetailPage({
           <p className="text-zinc-500 dark:text-zinc-400">Project type: {c.outputType.replace(/_/g, ' ')} • Received on {new Date(c.createdAt).toLocaleDateString()}</p>
         </div>
         <div className="flex gap-3">
+          <GenerateDraftButton caseId={c.id} />
           <ReviewModal caseId={c.id} currentStatus={c.status} />
           <StatusUpdateModal caseId={c.id} currentStatus={c.status} province={c.province} />
         </div>
@@ -244,3 +246,4 @@ function UserRow({ roleName, role, name, caseId, province }: { roleName: string,
     </div>
   );
 }
+

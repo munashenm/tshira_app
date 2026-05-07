@@ -78,6 +78,7 @@ model User {
   requisitions            Requisition[] @relation("RequisitionUser")
   approvedRequisitions    Requisition[] @relation("ApprovedBy")
   history                 CaseHistory[]
+  expenses                Expense[]     @relation("ExpenseUser")
 }
 
 model Case {
@@ -107,6 +108,7 @@ model Case {
   reviewer            User?      @relation("AssignedReviewer", fields: [reviewerId], references: [id])
 
   documents           Document[]
+  expenses            Expense[]
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -133,6 +135,20 @@ model Client {
   cases         Case[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], name: "ExpenseUser")
+  amount      Float
+  category    String   // TRAVEL, MEALS, PRINTING, etc.
+  description String
+  receiptUrl  String?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
 }
 
 model CaseHistory {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { uploadFile } from "@/lib/storage";
 
 export async function POST(
   request: Request,
@@ -13,42 +14,35 @@ export async function POST(
     const uploadedBy = formData.get("uploadedBy") as string;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // In a real app, you would upload the file to S3/Cloud Storage here.
-    // For this demo, we'll simulate a storage URL.
-    const mockUrl = `https://cloud-storage.itguysa.co.za/documents/${Date.now()}-${file.name}`;
+    // Use the unified storage utility
+    const fileUrl = await uploadFile(file, `case-${id}`);
 
     const document = await prisma.document.create({
       data: {
         caseId: id,
         name: file.name,
-        type: type, // Data Form, Draft, Final Review, etc.
-        url: mockUrl,
-        uploadedBy: uploadedBy || "Unknown User",
+        type: type || "General",
+        url: fileUrl,
+        uploadedBy: uploadedBy || "System",
       },
     });
 
-    // Also update case status to "DATA_SUBMITTED" if it's a data form
-    if (type === "Data Form") {
-      await prisma.case.update({
-        where: { id },
-        data: { 
-          status: "DATA_SUBMITTED",
-          history: {
-            create: {
-              status: "DATA_SUBMITTED",
-              comments: "Data collection forms uploaded by DCO.",
-            }
-          }
-        }
-      });
-    }
+    // Log this action in CaseHistory
+    await prisma.caseHistory.create({
+      data: {
+        caseId: id,
+        status: "DOCUMENT_IN_PROGRESS", // Or fetch current
+        comments: `Document uploaded: ${file.name} (${type})`,
+        userId: uploadedBy, // Assuming uploadedBy is the userId
+      }
+    });
 
     return NextResponse.json(document);
   } catch (error) {
-    console.error("Error uploading document:", error);
+    console.error("Upload error:", error);
     return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
   }
 }
