@@ -4,13 +4,14 @@ import { useState } from "react";
 import { X, Plus, Calendar, MapPin, Info } from "lucide-react";
 import { Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useSimulation } from "@/lib/SimulationContext";
 
 export default function CreateRequisitionModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { currentPersona } = useSimulation();
+
+  // Read logged-in user from localStorage
+  const [selectedProvince, setSelectedProvince] = useState<string>("LIMPOPO");
 
   const [formData, setFormData] = useState({
     location: "",
@@ -19,8 +20,6 @@ export default function CreateRequisitionModal() {
     isClientVisit: false,
     estimatedCost: 0,
   });
-
-  if (currentPersona?.role !== "PROVINCIAL_COORDINATOR") return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +30,8 @@ export default function CreateRequisitionModal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          province: currentPersona.province,
+          province: selectedProvince,
           dateTime: new Date(formData.dateTime).toISOString(),
-          userId: "demo-user-id", // In a real app this comes from session
         }),
       });
       if (res.ok) {
@@ -66,7 +64,17 @@ export default function CreateRequisitionModal() {
           <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
             <div>
               <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Create Space Booking</h2>
-              <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">Province: {currentPersona.province}</p>
+              <div className="mt-2">
+                <select
+                  value={selectedProvince}
+                  onChange={(e) => setSelectedProvince(e.target.value)}
+                  className="text-xs font-bold uppercase tracking-widest bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-none rounded-xl px-3 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.values(Province).map(p => (
+                    <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <button type="button" onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
               <X className="w-5 h-5 text-zinc-400" />

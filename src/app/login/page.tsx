@@ -13,12 +13,9 @@ export default function LoginPage() {
   const router = useRouter();
   const { setPersona } = useSimulation();
 
-  // Check if already logged in
   useEffect(() => {
     const auth = localStorage.getItem("tshira_auth");
-    if (auth) {
-      router.push("/");
-    }
+    if (auth) router.push("/");
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -27,26 +24,29 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // For now, we simulate a login by checking against the seeded admin
-      // In a real app, this would hit an API route
-      if (email === "admin@tshira.co.za" && password === "password123") {
-        const adminPersona = {
-          name: "Head Office Admin",
-          role: "ADMIN_OFFICER" as any,
-          province: null
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        const user = await res.json();
+        const persona = {
+          name: user.name || user.email,
+          role: user.role,
+          province: user.province || null,
         };
-        
-        localStorage.setItem("tshira_auth", JSON.stringify(adminPersona));
-        setPersona(adminPersona);
-        
-        // Brief delay for better UX
-        setTimeout(() => {
-          router.push("/");
-        }, 800);
+
+        localStorage.setItem("tshira_auth", JSON.stringify(persona));
+        setPersona(persona);
+
+        setTimeout(() => router.push("/"), 600);
       } else {
-        setError("Invalid email or password. Please try again.");
+        const err = await res.json();
+        setError(err.error || "Invalid email or password. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred.");
     } finally {
       setTimeout(() => setIsLoading(false), 800);
@@ -55,14 +55,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
-      {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
         <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="w-full max-w-[440px] relative">
-        {/* Logo Section */}
         <div className="flex flex-col items-center mb-10">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-blue-500/40 mb-6 animate-in fade-in zoom-in duration-700">
             <Briefcase className="w-8 h-8" />
@@ -73,11 +71,10 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Form */}
         <div className="bg-white dark:bg-zinc-900 rounded-[32px] p-10 border border-zinc-200 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-none animate-in fade-in slide-in-from-bottom-8 duration-700">
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-2xl text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-3 animate-shake">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-2xl text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 shrink-0" />
                 {error}
               </div>
@@ -87,7 +84,7 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Email Address</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
-                <input 
+                <input
                   type="email"
                   required
                   value={email}
@@ -101,11 +98,10 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Password</label>
-                <button type="button" className="text-xs font-bold text-blue-600 hover:text-blue-500">Forgot Password?</button>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
-                <input 
+                <input
                   type="password"
                   required
                   value={password}
@@ -116,10 +112,10 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl py-4 font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-70 disabled:active:scale-100"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl py-4 font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-70"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -134,12 +130,11 @@ export default function LoginPage() {
 
           <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800 text-center">
             <p className="text-sm text-zinc-500">
-              New to the system? <button className="font-bold text-blue-600 hover:text-blue-500">Contact IT Support</button>
+              Need access? <button className="font-bold text-blue-600 hover:text-blue-500">Contact IT Support</button>
             </p>
           </div>
         </div>
 
-        {/* Footer info */}
         <p className="text-center text-xs text-zinc-400 mt-12 font-medium">
           © 2026 Tshira Management Systems. All rights reserved.
         </p>
