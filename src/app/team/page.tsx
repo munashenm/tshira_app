@@ -9,7 +9,8 @@ import {
   MapPin,
   MoreVertical,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Briefcase
 } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import EditUserModal from "@/components/EditUserModal";
