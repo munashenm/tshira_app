@@ -44,12 +44,16 @@ export async function PATCH(
       reviewerId, 
       comments,
       beneficiaryDetails,
+      idNumber,
+      phone,
+      businessData,
       invoiceNumber,
       invoiceDate,
       actualCost,
       userId
     } = body;
 
+    // First update the case
     const updatedCase = await prisma.case.update({
       where: { id },
       data: {
@@ -69,13 +73,22 @@ export async function PATCH(
             comments: comments || "Status updated",
             userId: userId
           }
+        } : undefined,
+        // Update the client if business data is provided
+        client: (businessData || idNumber || phone) ? {
+          update: {
+            idNumber,
+            phone,
+            ...businessData
+          }
         } : undefined
       },
       include: {
         coordinator: true,
         dco: true,
         consultant: true,
-        reviewer: true
+        reviewer: true,
+        client: true
       }
     });
 

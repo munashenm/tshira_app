@@ -41,6 +41,7 @@ export default async function CaseDetailPage({
       consultant: true,
       reviewer: true,
       documents: true,
+      client: true,
       history: {
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
@@ -75,6 +76,13 @@ export default async function CaseDetailPage({
         </div>
         <div className="flex gap-3">
           <GenerateDraftButton caseId={c.id} />
+          <button 
+            onClick={() => window.print()}
+            className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all group shadow-lg shadow-zinc-800/20"
+          >
+            <FileText className="w-4 h-4 text-zinc-400 group-hover:text-white" />
+            Export Dossier
+          </button>
           <ReviewModal caseId={c.id} currentStatus={c.status} />
           <StatusUpdateModal caseId={c.id} currentStatus={c.status} province={c.province} />
         </div>
@@ -132,7 +140,14 @@ export default async function CaseDetailPage({
               </div>
             }
             fieldwork={
-              <DataCollectionForm caseId={c.id} currentStatus={c.status} initialData={c.beneficiaryDetails} />
+              <DataCollectionForm 
+                caseId={c.id} 
+                currentStatus={c.status} 
+                initialData={c.beneficiaryDetails} 
+                initialId={c.client?.idNumber}
+                initialPhone={c.client?.phone}
+                clientData={c.client}
+              />
             }
             history={
               <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">

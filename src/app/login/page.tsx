@@ -33,6 +33,7 @@ export default function LoginPage() {
       if (res.ok) {
         const user = await res.json();
         const persona = {
+          id: user.id,
           name: user.name || user.email,
           role: user.role,
           province: user.province || null,

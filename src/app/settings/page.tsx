@@ -4,10 +4,10 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   User, Bell, Shield, Database, Clock, Smartphone,
   Save, Globe, CheckCircle2, Loader2, Key, Mail,
-  Receipt, Building, CreditCard, FileText, Image, AlertTriangle
+  Receipt, Building, CreditCard, FileText, Image, AlertTriangle, UserCircle
 } from "lucide-react";
 
-type Tab = "general" | "invoice" | "notifications" | "security" | "workflow" | "data" | "logs";
+type Tab = "general" | "profile" | "invoice" | "notifications" | "security" | "workflow" | "data" | "logs";
 
 interface Settings {
   orgName: string; orgEmail: string; orgPhone: string; orgAddress: string;
@@ -84,6 +84,7 @@ export default function SettingsPage() {
 
   const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: "general", icon: <Building />, label: "Organisation" },
+    { id: "profile", icon: <UserCircle />, label: "My Profile" },
     { id: "invoice", icon: <Receipt />, label: "Invoice" },
     { id: "notifications", icon: <Bell />, label: "Notifications" },
     { id: "workflow", icon: <Clock />, label: "Workflow & SLA" },
@@ -168,6 +169,42 @@ export default function SettingsPage() {
                   </div>
                 )}
                 <p className="text-xs text-zinc-400">Paste a publicly accessible image URL. Leave blank to use the text logo.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── PROFILE ── */}
+          {activeTab === "profile" && (
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-8">
+              <h3 className="text-lg font-bold flex items-center gap-2"><UserCircle className="w-5 h-5 text-blue-500" /> Personal Profile</h3>
+              
+              <div className="flex items-center gap-8 p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-[32px]">
+                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-[32px] flex items-center justify-center text-blue-600 relative group cursor-pointer overflow-hidden">
+                   <UserCircle className="w-12 h-12" />
+                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                     <Image className="w-6 h-6 text-white" />
+                   </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">Identity Verification</p>
+                  <p className="text-sm text-zinc-500">Upload your professional avatar for audit logs.</p>
+                  <button className="text-xs font-black text-blue-600 uppercase tracking-widest mt-2">Change Photo</button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Digital Signature</label>
+                  <div className="h-40 bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-[24px] flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-blue-500 transition-all">
+                     <FileText className="w-8 h-8 text-zinc-200 group-hover:text-blue-500" />
+                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Click to upload signature</p>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 italic">This signature will be applied to generated Business Plans and Invoices.</p>
+                </div>
+                <div className="space-y-6">
+                   <Field label="Display Name" value="Senior Consultant" onChange={() => {}} />
+                   <Field label="Professional Email" value="consultant@tshira.co.za" onChange={() => {}} />
+                </div>
               </div>
             </div>
           )}

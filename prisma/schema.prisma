@@ -67,6 +67,8 @@ model User {
   role          Role      @default(DATA_COLLECTION_OFFICER)
   province      Province?
   active        Boolean   @default(true)
+  avatarUrl     String?
+  signature     String?   // Base64 or URL
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -132,6 +134,16 @@ model Client {
   phone         String?
   address       String?
   province      Province
+  
+  // Business Data
+  ckNumber      String?
+  companyName   String?
+  tradingName   String?
+  businessEmail String?
+  businessPhone String?
+  businessWebsite String?
+  businessAddress String?
+
   cases         Case[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

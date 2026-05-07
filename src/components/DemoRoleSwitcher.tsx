@@ -9,14 +9,14 @@ export default function DemoRoleSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentPersona, setPersona } = useSimulation();
 
-  const personas: Persona[] = [
-    { name: "Admin Officer", role: Role.ADMIN_OFFICER, province: null },
-    { name: "Limpopo Coordinator", role: Role.PROVINCIAL_COORDINATOR, province: Province.LIMPOPO },
-    { name: "Mpumalanga DCO", role: Role.DATA_COLLECTION_OFFICER, province: Province.MPUMALANGA },
-    { name: "Gauteng Consultant", role: Role.BUSINESS_CONSULTANT, province: Province.GAUTENG },
-    { name: "Senior Reviewer", role: Role.REVIEWER, province: null },
-    { name: "Finance Manager", role: Role.FINANCE, province: null },
-  ];
+    const personas: Persona[] = [
+      { id: "admin-1", name: "Admin Officer", role: Role.ADMIN_OFFICER, province: null },
+      { id: "coord-lim", name: "Limpopo Coordinator", role: Role.PROVINCIAL_COORDINATOR, province: Province.LIMPOPO },
+      { id: "dco-mpu", name: "Mpumalanga DCO", role: Role.DATA_COLLECTION_OFFICER, province: Province.MPUMALANGA },
+      { id: "cons-gau", name: "Gauteng Consultant", role: Role.BUSINESS_CONSULTANT, province: Province.GAUTENG },
+      { id: "rev-1", name: "Senior Reviewer", role: Role.REVIEWER, province: null },
+      { id: "fin-1", name: "Finance Manager", role: Role.FINANCE, province: null },
+    ];
 
   if (!currentPersona) return null;
 
