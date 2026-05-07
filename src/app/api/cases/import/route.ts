@@ -1,0 +1,41 @@
+import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { Province, CaseStatus } from "@prisma/client";
+
+export async function POST(request: Request) {
+  try {
+    const { cases } = await request.json(); // Array of case objects
+
+    if (!Array.isArray(cases)) {
+      return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
+    }
+
+    const createdCases = await Promise.all(
+      cases.map(async (c) => {
+        return prisma.case.create({
+          data: {
+            clientName: c.clientName,
+            nydaReference: c.nydaReference,
+            province: (c.province as Province) || Province.LIMPOPO,
+            outputType: c.outputType || "Business Plan",
+            status: CaseStatus.RECEIVED_FROM_NYDA,
+            history: {
+              create: {
+                status: CaseStatus.RECEIVED_FROM_NYDA,
+                comments: "Case imported via bulk upload",
+              }
+            }
+          }
+        });
+      })
+    );
+
+    return NextResponse.json({ 
+      message: `Successfully imported ${createdCases.length} cases`,
+      count: createdCases.length 
+    });
+  } catch (error) {
+    console.error("Import error:", error);
+    return NextResponse.json({ error: "Failed to import cases" }, { status: 500 });
+  }
+}

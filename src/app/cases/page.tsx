@@ -1,138 +1,304 @@
-import { prisma } from "@/lib/db";
+"use client";
 
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from "react";
 import { 
   Briefcase, 
   MapPin, 
   Clock, 
   ChevronRight,
+  Search,
+  CheckSquare,
+  Square,
+  Users,
   Filter,
-  Search
+  ArrowUpDown,
+  Download,
+  Loader2,
+  CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
-import { CaseStatus, Province } from "@prisma/client";
+import { CaseStatus, Province, User } from "@prisma/client";
+import BulkAssignmentModal from "@/components/BulkAssignmentModal";
 
-export default async function CasesPage({
-  searchParams,
-}: {
-  searchParams: { province?: string };
-}) {
-  const selectedProvince = searchParams.province as Province | undefined;
-  
-  const cases = await prisma.case.findMany({
-    where: selectedProvince ? { province: selectedProvince } : {},
-    orderBy: { createdAt: 'desc' },
-    include: {
-      coordinator: true,
-      dco: true,
-      consultant: true,
-      reviewer: true
+type CaseWithRelations = any; // We'll fetch client-side for interactivity
+
+export default function CasesPage() {
+  const [cases, setCases] = useState<CaseWithRelations[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
+  const [provinceFilter, setProvinceFilter] = useState<Province | "ALL">("ALL");
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  useEffect(() => {
+    fetchCases();
+  }, []);
+
+  const simulateImport = async () => {
+    if (!confirm("Simulate importing 5 new cases from NYDA?")) return;
+    setIsImporting(true);
+    try {
+      const mockCases = [
+        { clientName: "Johannes Steyn", province: "MPUMALANGA", outputType: "Business Plan", nydaReference: "NYDA-2026-881" },
+        { clientName: "Thabo Mbeki Ent", province: "GAUTENG", outputType: "Feasibility Study", nydaReference: "NYDA-2026-902" },
+        { clientName: "Nomusa Dlamini", province: "LIMPOPO", outputType: "Business Plan", nydaReference: "NYDA-2026-443" },
+        { clientName: "Pretoria Tech Hub", province: "GAUTENG", outputType: "Marketing Strategy", nydaReference: "NYDA-2026-112" },
+        { clientName: "Kruger Safaris", province: "MPUMALANGA", outputType: "Business Plan", nydaReference: "NYDA-2026-765" },
+      ];
+
+      const res = await fetch("/api/cases/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cases: mockCases }),
+      });
+      if (res.ok) {
+        await fetchCases();
+      }
+    } finally {
+      setIsImporting(false);
     }
+  };
+
+  const fetchCases = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/cases");
+      if (res.ok) {
+        const data = await res.json();
+        setCases(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredCases = cases.filter(c => {
+    const matchesSearch = 
+      c.clientName.toLowerCase().includes(search.toLowerCase()) ||
+      (c.nydaReference?.toLowerCase().includes(search.toLowerCase()));
+    const matchesProvince = provinceFilter === "ALL" || c.province === provinceFilter;
+    return matchesSearch && matchesProvince;
   });
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredCases.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredCases.map(c => c.id));
+    }
+  };
+
+  if (loading) return (
+    <div className="p-8 flex flex-col items-center justify-center min-h-screen gap-4">
+      <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+      <p className="text-xs font-black text-zinc-400 uppercase tracking-widest">Loading Projects...</p>
+    </div>
+  );
+
   return (
-    <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
+    <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen relative">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Work Items</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage and track NYDA projects across all provinces.</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage and track {cases.length} NYDA projects across South Africa.</p>
+        </div>
+        <div className="flex gap-3">
+          <button 
+            onClick={simulateImport}
+            disabled={isImporting}
+            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+          >
+            {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+            {isImporting ? "Importing..." : "Import NYDA Batch"}
+          </button>
+          <a href="/api/export/cases" className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">
+            <Download className="w-4 h-4" /> Export CSV
+          </a>
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input 
             placeholder="Search by client or reference..." 
-            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none shadow-sm"
           />
         </div>
-        <div className="flex gap-2 bg-white dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <a 
-            href="/cases"
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${!selectedProvince ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50' : 'text-zinc-500 hover:text-zinc-700'}`}
+        <div className="flex gap-2 bg-white dark:bg-zinc-900 p-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-x-auto no-scrollbar">
+          <button 
+            onClick={() => setProvinceFilter("ALL")}
+            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap ${provinceFilter === "ALL" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-zinc-400 hover:text-zinc-900'}`}
           >
-            All
-          </a>
+            All Provinces
+          </button>
           {Object.values(Province).map((p) => (
-            <a 
+            <button 
               key={p}
-              href={`/cases?province=${p}`}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${selectedProvince === p ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50' : 'text-zinc-500 hover:text-zinc-700'}`}
+              onClick={() => setProvinceFilter(p)}
+              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap ${provinceFilter === p ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-zinc-400 hover:text-zinc-900'}`}
             >
-              {p.slice(0, 3)}
-            </a>
+              {p.replace('_', ' ')}
+            </button>
           ))}
         </div>
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 text-white px-8 py-4 rounded-[32px] shadow-2xl flex items-center gap-8 animate-in slide-in-from-bottom-8 duration-300">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {selectedIds.length}
+            </div>
+            <p className="text-sm font-bold">Items Selected</p>
+          </div>
+          <div className="h-6 w-px bg-zinc-700" />
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setShowBulkModal(true)}
+              className="flex items-center gap-2 bg-white text-zinc-900 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-zinc-100 transition-all active:scale-95"
+            >
+              <Users className="w-4 h-4" /> Bulk Assign
+            </button>
+            <button 
+              onClick={() => setSelectedIds([])}
+              className="text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-white px-4 py-2.5 rounded-2xl transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4">
-        {cases.map((c) => (
-          <Link 
-            key={c.id} 
-            href={`/cases/${c.id}`}
-            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-900/50 transition-all group"
+        {/* Select All Toggle */}
+        <div className="flex items-center gap-4 px-6 py-2">
+          <button 
+            onClick={toggleSelectAll}
+            className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-zinc-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500 transition-colors">
-                  <Briefcase className="w-6 h-6" />
+            {selectedIds.length === filteredCases.length && filteredCases.length > 0 ? (
+              <CheckSquare className="w-4 h-4 text-blue-500" />
+            ) : (
+              <Square className="w-4 h-4" />
+            )}
+            Select All Visible
+          </button>
+        </div>
+
+        {filteredCases.map((c) => (
+          <div 
+            key={c.id} 
+            className={`group bg-white dark:bg-zinc-900 rounded-3xl p-6 border transition-all flex items-center gap-4 ${
+              selectedIds.includes(c.id) 
+                ? "border-blue-500 ring-2 ring-blue-50 dark:ring-blue-900/10 shadow-lg" 
+                : "border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md"
+            }`}
+          >
+            <button 
+              onClick={() => toggleSelect(c.id)}
+              className="shrink-0 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-all"
+            >
+              {selectedIds.includes(c.id) ? (
+                <CheckSquare className="w-6 h-6 text-blue-600" />
+              ) : (
+                <Square className="w-6 h-6 text-zinc-200 dark:text-zinc-800" />
+              )}
+            </button>
+            
+            <Link href={`/cases/${c.id}`} className="flex-1 flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center transition-colors ${
+                  selectedIds.includes(c.id) ? "bg-blue-600 text-white" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700"
+                }`}>
+                  <Briefcase className="w-7 h-7" />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
-                    <h3 className="font-bold text-zinc-900 dark:text-zinc-50">{c.clientName}</h3>
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{c.clientName}</h3>
+                    <span className="text-[10px] font-black tracking-widest uppercase text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
                       {c.nydaReference || "NO REF"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-zinc-500">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {c.province}
+                  <div className="flex items-center gap-6 mt-2 text-xs font-medium text-zinc-500">
+                    <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded-lg">
+                      <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                      {c.province.replace('_', ' ')}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {new Date(c.createdAt).toLocaleDateString()}
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                      {new Date(c.createdAt).toLocaleDateString('en-ZA', { dateStyle: 'medium' })}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${c.coordinatorId ? 'text-emerald-500' : 'text-zinc-200'}`} />
+                      {c.coordinator?.name || "Unassigned"}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-10">
                 <div className="text-right hidden md:block">
-                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Status</div>
+                  <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Current Status</div>
                   <StatusBadge status={c.status} />
                 </div>
-                <div className="text-right hidden lg:block min-w-[120px]">
-                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Type</div>
-                  <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{c.outputType.replace('_', ' ')}</div>
+                <div className="text-right hidden lg:block min-w-[140px]">
+                  <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Project Type</div>
+                  <div className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{c.outputType.replace(/_/g, ' ')}</div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-zinc-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-6 h-6 text-zinc-200 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         ))}
-        {cases.length === 0 && (
-          <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
-            <Briefcase className="w-12 h-12 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
-            <p className="text-zinc-500">No work items found for this selection.</p>
+
+        {filteredCases.length === 0 && (
+          <div className="text-center py-32 bg-white dark:bg-zinc-900 rounded-[40px] border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+            <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800 rounded-[32px] flex items-center justify-center mx-auto mb-6">
+              <Filter className="w-10 h-10 text-zinc-200 dark:text-zinc-700" />
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">No matches found</h3>
+            <p className="text-zinc-500 mt-2">Try adjusting your filters or search terms.</p>
+            <button onClick={() => { setSearch(""); setProvinceFilter("ALL"); }} className="mt-6 text-blue-600 font-bold hover:underline">Clear all filters</button>
           </div>
         )}
       </div>
+
+      {showBulkModal && (
+        <BulkAssignmentModal 
+          caseIds={selectedIds}
+          onClose={() => setShowBulkModal(false)}
+          onSuccess={() => {
+            fetchCases();
+            setSelectedIds([]);
+          }}
+        />
+      )}
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: CaseStatus }) {
-  // Simple mapping for demo
   const isActionNeeded = status.includes('RETURNED') || status === 'RECEIVED_FROM_NYDA';
   const isDone = status === 'CLOSED' || status === 'PAID';
 
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${
-      isActionNeeded ? "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400" :
-      isDone ? "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400" :
-      "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border ${
+      isActionNeeded ? "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30" :
+      isDone ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30" :
+      "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/30"
     }`}>
       {status.replace(/_/g, ' ')}
     </span>

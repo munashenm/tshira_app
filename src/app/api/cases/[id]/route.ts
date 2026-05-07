@@ -46,7 +46,8 @@ export async function PATCH(
       beneficiaryDetails,
       invoiceNumber,
       invoiceDate,
-      actualCost
+      actualCost,
+      userId
     } = body;
 
     const updatedCase = await prisma.case.update({
@@ -66,6 +67,7 @@ export async function PATCH(
           create: {
             status: status as CaseStatus,
             comments: comments || "Status updated",
+            userId: userId
           }
         } : undefined
       },

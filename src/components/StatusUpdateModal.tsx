@@ -35,7 +35,10 @@ export default function StatusUpdateModal({
       const res = await fetch(`/api/cases/${caseId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ 
+          status: newStatus,
+          userId: currentPersona?.id 
+        }),
       });
       if (res.ok) {
         setIsOpen(false);

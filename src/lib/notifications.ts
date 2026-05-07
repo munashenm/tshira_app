@@ -1,39 +1,37 @@
-/**
- * Notification Service Mockup
- * In a production environment, you would integrate this with:
- * - SendGrid / Postmark for Emails
- * - Twilio / WhatsApp Business API for WhatsApp
- */
+import { prisma } from "./db";
 
-export async function sendNotification({
-  to,
-  name,
-  type,
-  caseRef,
-  message,
-}: {
+interface NotificationPayload {
   to: string;
   name: string;
   type: "EMAIL" | "WHATSAPP" | "BOTH";
   caseRef: string;
   message: string;
-}) {
+}
+
+export async function sendNotification(payload: NotificationPayload) {
+  const settings = await prisma.systemSettings.findUnique({
+    where: { id: "singleton" }
+  });
+
+  if (!settings) {
+    console.warn("No system settings found for notifications. Using defaults.");
+  }
+
+  const { to, name, type, caseRef, message } = payload;
   const timestamp = new Date().toLocaleString();
   
-  const logMessage = `
-[NOTIFICATION SENT] - ${timestamp}
------------------------------------
-TO: ${name} (${to})
-METHOD: ${type}
-CASE REF: ${caseRef}
-CONTENT: ${message}
------------------------------------
-  `;
+  // 1. Email Channel
+  if ((type === "EMAIL" || type === "BOTH") && (settings?.emailEnabled ?? true)) {
+    console.log(`[EMAIL] To: ${name} (${to}) | Ref: ${caseRef} | Content: ${message}`);
+    // Integration point: Resend / SendGrid
+  }
 
-  // Log to console for the demo
-  console.log(logMessage);
+  // 2. WhatsApp Channel
+  if ((type === "WHATSAPP" || type === "BOTH") && (settings?.whatsappEnabled ?? false)) {
+    console.log(`[WHATSAPP] To: ${name} (${to}) | Ref: ${caseRef} | Content: ${message}`);
+    // Integration point: Twilio
+  }
 
-  // In a real app, you would perform the HTTP calls to the providers here
   return { success: true };
 }
 
@@ -46,4 +44,10 @@ export const notificationTemplates = {
   
   returnedForCorrection: (ref: string, comments: string) => 
     `Project ${ref} has been returned for correction. Feedback: "${comments}"`,
+
+  invoiceGenerated: (ref: string, amount: string) => 
+    `An invoice has been generated for project ${ref} in the amount of R${amount}.`,
+  
+  paymentReceived: (ref: string) => 
+    `Payment has been confirmed for project ${ref}. Thank you!`,
 };

@@ -41,6 +41,7 @@ export default async function CaseDetailPage({
       reviewer: true,
       documents: true,
       history: {
+        include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
         take: 20
       }
@@ -142,10 +143,13 @@ export default async function CaseDetailPage({
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
-                          <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{h.status.replace(/_/g, ' ')}</p>
+                          <div>
+                            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{h.status.replace(/_/g, ' ')}</p>
+                            {h.user?.name && <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-0.5">By {h.user.name}</p>}
+                          </div>
                           <span className="text-[10px] text-zinc-400 font-medium uppercase">{new Date(h.createdAt).toLocaleString()}</span>
                         </div>
-                        {h.comments && <p className="text-xs text-zinc-500 mt-1">{h.comments}</p>}
+                        {h.comments && <p className="text-xs text-zinc-500 mt-2 p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100 dark:border-zinc-800 italic">{h.comments}</p>}
                       </div>
                     </div>
                   ))}
