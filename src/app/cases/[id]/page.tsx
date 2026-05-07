@@ -23,6 +23,7 @@ import DataCollectionForm from "@/components/DataCollectionForm";
 import CaseTabs from "@/components/CaseTabs";
 import GenerateDraftButton from "@/components/GenerateDraftButton";
 import PrintButton from "@/components/PrintButton";
+import BusinessPlanForm from "@/components/forms/BusinessPlanForm";
 
 export default async function CaseDetailPage({
   params,
@@ -47,7 +48,8 @@ export default async function CaseDetailPage({
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
         take: 20
-      }
+      },
+      formResponses: true
     }
   });
 
@@ -148,14 +150,21 @@ export default async function CaseDetailPage({
               </div>
             }
             fieldwork={
-              <DataCollectionForm 
-                caseId={c.id} 
-                currentStatus={c.status} 
-                initialData={c.beneficiaryDetails} 
-                initialId={c.client?.idNumber}
-                initialPhone={c.client?.phone}
-                clientData={c.client}
-              />
+              c.outputType === "BUSINESS_PLAN" || c.outputType === "Business_Plan" || c.outputType === "Business Plan" ? (
+                <BusinessPlanForm 
+                  caseId={c.id} 
+                  initialData={c.formResponses.find(r => r.formType === "BUSINESS_PLAN_QUESTIONNAIRE")?.data} 
+                />
+              ) : (
+                <DataCollectionForm 
+                  caseId={c.id} 
+                  currentStatus={c.status} 
+                  initialData={c.beneficiaryDetails} 
+                  initialId={c.client?.idNumber}
+                  initialPhone={c.client?.phone}
+                  clientData={c.client}
+                />
+              )
             }
             history={
               <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
