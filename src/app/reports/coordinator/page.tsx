@@ -3,6 +3,7 @@ import { Role, Province, CaseStatus } from "@prisma/client";
 import { MapPin, User, FileText, Printer, ArrowLeft, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { PrintReportButton, ReportUserSelector } from "@/components/ReportClientSide";
 
 export const dynamic = 'force-dynamic';
 
@@ -61,13 +62,7 @@ export default async function CoordinatorReportPage({
           Back to Reports
         </Link>
         {selectedCoordinator && (
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
-          >
-            <Printer className="w-4 h-4" />
-            Print Recording Form
-          </button>
+          <PrintReportButton label="Print Recording Form" />
         )}
       </div>
 
@@ -89,16 +84,11 @@ export default async function CoordinatorReportPage({
               <div className="flex justify-between items-center">
                 <p className="text-lg font-bold text-zinc-900">{selectedCoordinator?.name || "________________________________"}</p>
                 {!selectedCoordinator && (
-                   <form className="print:hidden">
-                    <select 
-                      name="coordinatorId" 
-                      onChange={(e) => (window.location.href = `?coordinatorId=${e.target.value}`)}
-                      className="bg-zinc-100 border-none rounded-lg px-3 py-1 text-xs focus:ring-0"
-                    >
-                      <option value="">Select Coordinator...</option>
-                      {coordinators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </form>
+                  <ReportUserSelector 
+                    users={coordinators} 
+                    placeholder="Select Coordinator..." 
+                    paramName="coordinatorId" 
+                  />
                 )}
               </div>
             </div>

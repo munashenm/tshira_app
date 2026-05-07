@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { MapPin, User, FileText, Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { PrintReportButton, ReportUserSelector } from "@/components/ReportClientSide";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,13 +36,7 @@ export default async function DCOReportPage({
           Back to Reports
         </Link>
         {selectedDco && (
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-zinc-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-zinc-900/20 active:scale-95 transition-all"
-          >
-            <Printer className="w-4 h-4" />
-            Print DCO Form
-          </button>
+          <PrintReportButton label="Print DCO Form" />
         )}
       </div>
 
@@ -63,16 +58,11 @@ export default async function DCOReportPage({
               <div className="flex justify-between items-center mt-1">
                 <p className="text-sm font-bold">{selectedDco?.name || "________________________________"}</p>
                 {!selectedDco && (
-                  <form className="print:hidden">
-                    <select 
-                      name="dcoId" 
-                      onChange={(e) => (window.location.href = `?dcoId=${e.target.value}`)}
-                      className="bg-zinc-100 border-none rounded-lg px-3 py-1 text-xs focus:ring-0"
-                    >
-                      <option value="">Select DCO...</option>
-                      {dcos.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                    </select>
-                  </form>
+                  <ReportUserSelector 
+                    users={dcos} 
+                    placeholder="Select DCO..." 
+                    paramName="dcoId" 
+                  />
                 )}
               </div>
             </div>
