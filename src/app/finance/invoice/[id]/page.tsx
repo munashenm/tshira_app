@@ -97,9 +97,8 @@ export default function InvoicePage() {
               <img src={s.orgLogoUrl} alt={s.orgName} className="h-14 object-contain mb-2" onError={(e) => (e.currentTarget.style.display = 'none')} />
             ) : (
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-                  <Briefcase className="w-5 h-5" />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="Tshira Logo" className="h-14 object-contain" />
               </div>
             )}
             <div>

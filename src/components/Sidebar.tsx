@@ -30,10 +30,11 @@ export default function Sidebar() {
     <aside className="w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col h-screen sticky top-0">
       <div className="p-8">
         <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-            <Briefcase className="w-6 h-6" />
+          <div className="w-10 h-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">NYDA Flow</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Tshira Emporium</span>
         </div>
 
         <nav className="space-y-1">

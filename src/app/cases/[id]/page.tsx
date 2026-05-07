@@ -61,6 +61,19 @@ export default async function CaseDetailPage({
 
       <div className="flex justify-between items-start">
         <div className="space-y-2">
+          {/* Print-only Logo Header */}
+          <div className="hidden print:flex items-center gap-6 mb-8 border-b-2 border-zinc-900 pb-8 w-full">
+            <img src="/logo.png" alt="Tshira Logo" className="h-16 object-contain" />
+            <div>
+              <h1 className="text-2xl font-black">TSHIRA EMPORIUM</h1>
+              <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">Workflow Management Dossier</p>
+            </div>
+            <div className="ml-auto text-right text-[10px] text-zinc-400">
+              <p>Generated: {new Date().toLocaleString()}</p>
+              <p>Reference: {c.nydaReference || c.id}</p>
+            </div>
+          </div>
+
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{c.clientName}</h1>
             <span className="text-sm font-bold text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1 rounded-full">
@@ -205,6 +218,17 @@ export default async function CaseDetailPage({
           </div>
         </div>
       </div>
+      <style>{`
+        @media print {
+          body { background: white !important; margin: 0; }
+          .print\\:hidden, button, a[href="/cases"] { display: none !important; }
+          .max-w-4xl, .p-8 { padding: 0 !important; max-width: 100% !important; }
+          .bg-zinc-50, .dark\\:bg-zinc-950 { background: white !important; }
+          .shadow-sm, .shadow-xl { shadow: none !important; border: 1px solid #eee !important; }
+          .lg\\:grid-cols-3 { grid-template-cols: 1fr !important; }
+          .lg\\:col-span-2 { grid-column: span 1 / span 1 !important; }
+        }
+      `}</style>
     </div>
   );
 }

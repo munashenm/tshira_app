@@ -63,12 +63,13 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[440px] relative">
         <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-blue-500/40 mb-6 animate-in fade-in zoom-in duration-700">
-            <Briefcase className="w-8 h-8" />
+          <div className="w-20 h-20 mb-6 animate-in fade-in zoom-in duration-700">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Tshira Logo" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">NYDA Flow</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-center">
-            Sign in to access the Workflow Management System
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Tshira Emporium</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-center font-medium">
+            Workflow Management System
           </p>
         </div>
 
