@@ -61,8 +61,8 @@ export default function FinanceActions({
 
   return (
     <div className="flex justify-end gap-2 relative">
-      {/* STEP 1: Ready for invoicing */}
-      {(status === "CLIENT_APPROVED" || status === "READY_FOR_INVOICING") && !showInvoiceForm && (
+      {/* STEP 1: Show Generate Invoice for any case not yet invoiced */}
+      {(status !== "INVOICED" && status !== "PAID" && status !== "CLOSED") && !showInvoiceForm && (
         <button 
           onClick={() => setShowInvoiceForm(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
