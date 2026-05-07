@@ -158,7 +158,8 @@ export default async function CaseDetailPage({
                   )}
                 </div>
               </div>
-            }
+            </div>
+          }
             fieldwork={
               c.outputType === "BUSINESS_PLAN" || c.outputType === "Business_Plan" || c.outputType === "Business Plan" ? (
                 <BusinessPlanForm 
