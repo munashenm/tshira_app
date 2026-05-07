@@ -50,7 +50,13 @@ export async function PATCH(
       invoiceNumber,
       invoiceDate,
       actualCost,
-      userId
+      userId,
+      adminOffice,
+      voucherAppNumber,
+      dateAllocatedToCoordinator,
+      dateAllocatedToConsultant,
+      dateCompleted,
+      clientUpdate
     } = body;
 
     // First update the case
@@ -67,6 +73,11 @@ export async function PATCH(
         invoiceNumber,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
         actualCost,
+        adminOffice,
+        voucherAppNumber,
+        dateAllocatedToCoordinator: dateAllocatedToCoordinator ? new Date(dateAllocatedToCoordinator) : undefined,
+        dateAllocatedToConsultant: dateAllocatedToConsultant ? new Date(dateAllocatedToConsultant) : undefined,
+        dateCompleted: dateCompleted ? new Date(dateCompleted) : undefined,
         history: status ? {
           create: {
             status: status as CaseStatus,
@@ -75,11 +86,12 @@ export async function PATCH(
           }
         } : undefined,
         // Update the client if business data is provided
-        client: (businessData || idNumber || phone) ? {
+        client: (businessData || idNumber || phone || clientUpdate) ? {
           update: {
             idNumber,
             phone,
-            ...businessData
+            ...businessData,
+            ...clientUpdate
           }
         } : undefined
       },

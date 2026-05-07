@@ -120,6 +120,13 @@ model Case {
   invoiceDate         DateTime?
   paymentStatus       String?
 
+  // Administrative Tracking
+  adminOffice               String?
+  voucherAppNumber          String?
+  dateAllocatedToCoordinator DateTime?
+  dateAllocatedToConsultant   DateTime?
+  dateCompleted             DateTime?
+
   clientId            String?
   client              Client?    @relation(fields: [clientId], references: [id])
 
@@ -135,6 +142,8 @@ model Client {
   phone         String?
   address       String?
   province      Province
+  district      String?
+  municipality  String?
   
   // Business Data
   ckNumber      String?

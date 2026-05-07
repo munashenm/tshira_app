@@ -25,6 +25,7 @@ import GenerateDraftButton from "@/components/GenerateDraftButton";
 import PrintButton from "@/components/PrintButton";
 import BusinessPlanForm from "@/components/forms/BusinessPlanForm";
 import ClientChecklistForm from "@/components/forms/ClientChecklistForm";
+import ClientRegistrationForm from "@/components/forms/ClientRegistrationForm";
 
 export default async function CaseDetailPage({
   params,
@@ -104,6 +105,8 @@ export default async function CaseDetailPage({
           <CaseTabs 
             overview={
               <div className="space-y-8">
+                <ClientRegistrationForm caseData={c} />
+                
                 {/* Status Timeline Card */}
                 <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
                   <h3 className="text-lg font-bold mb-8 flex items-center gap-2">
