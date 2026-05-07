@@ -32,44 +32,68 @@ export default async function TeamPage() {
         <AddUserModal />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {users.map((user) => (
-          <div key={user.id} className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 bg-zinc-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500 transition-colors">
-                <Users className="w-6 h-6" />
-              </div>
-              <EditUserModal user={user} />
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-bold text-zinc-900 dark:text-zinc-50">{user.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-zinc-500 mt-1">
-                  <Mail className="w-3.5 h-3.5" />
-                  {user.email}
-                </div>
+      <div className="space-y-12">
+        {roles.map((role) => {
+          const roleUsers = users.filter(u => u.role === role);
+          if (roleUsers.length === 0) return null;
+
+          return (
+            <div key={role} className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                <h2 className="text-xs font-black text-zinc-400 uppercase tracking-[0.3em] px-4 whitespace-nowrap">
+                  {role.replace(/_/g, ' ')}s
+                </h2>
+                <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 flex items-center gap-1.5">
-                  <Shield className="w-3 h-3" />
-                  {user.role.replace(/_/g, ' ')}
-                </span>
-                {user.province && (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 flex items-center gap-1.5">
-                    <MapPin className="w-3 h-3" />
-                    {user.province}
-                  </span>
-                )}
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5 ${user.active ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-red-50 text-red-600'}`}>
-                  {user.active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                  {user.active ? 'Active' : 'Inactive'}
-                </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {roleUsers.map((user) => (
+                  <div key={user.id} className="bg-white dark:bg-zinc-900 rounded-[32px] p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/5 to-transparent pointer-events-none" />
+                    
+                    <div className="flex justify-between items-start mb-6">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-lg ${
+                        role === 'ADMIN_OFFICER' ? 'bg-zinc-900 text-white shadow-zinc-900/10' :
+                        role === 'PROVINCIAL_COORDINATOR' ? 'bg-blue-600 text-white shadow-blue-600/10' :
+                        role === 'DATA_COLLECTION_OFFICER' ? 'bg-emerald-500 text-white shadow-emerald-500/10' :
+                        role === 'BUSINESS_CONSULTANT' ? 'bg-amber-500 text-white shadow-amber-500/10' :
+                        'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
+                      }`}>
+                        {role === 'ADMIN_OFFICER' && <Shield className="w-7 h-7" />}
+                        {role === 'PROVINCIAL_COORDINATOR' && <MapPin className="w-7 h-7" />}
+                        {role === 'DATA_COLLECTION_OFFICER' && <Users className="w-7 h-7" />}
+                        {role === 'BUSINESS_CONSULTANT' && <Briefcase className="w-7 h-7" />}
+                        {role === 'REVIEWER' && <CheckCircle2 className="w-7 h-7" />}
+                      </div>
+                      <EditUserModal user={user} />
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50">{user.name}</h3>
+                        <p className="text-xs text-zinc-400 font-medium mt-1 truncate">{user.email}</p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-50 dark:border-zinc-800">
+                        {user.province && (
+                          <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                            <MapPin className="w-3 h-3" />
+                            {user.province.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${user.active ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-red-50 text-red-600'}`}>
+                          {user.active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                          {user.active ? 'Live' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

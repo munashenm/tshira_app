@@ -11,6 +11,8 @@ import {
   Briefcase
 } from "lucide-react";
 import Link from "next/link";
+import { Province } from "@prisma/client";
+import CreateClientModal from "@/components/CreateClientModal";
 
 export default async function ClientsPage({
   searchParams,
@@ -41,6 +43,9 @@ export default async function ClientsPage({
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Beneficiary Database</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Centralized record of all clients and their project history.</p>
+        </div>
+        <div className="flex gap-3">
+          <CreateClientModal provinces={Object.values(Province)} />
         </div>
       </div>
 

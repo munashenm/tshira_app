@@ -106,30 +106,44 @@ export default function AddUserModal() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2">
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">System Role</label>
-              <select 
-                value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value as Role})}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-              >
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {Object.values(Role).map(r => (
-                  <option key={r} value={r}>{r.replace(/_/g, ' ')}</option>
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setFormData({...formData, role: r})}
+                    className={`p-4 rounded-2xl border text-left transition-all ${formData.role === r ? 'bg-blue-600 border-transparent text-white shadow-lg shadow-blue-500/20' : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-blue-500'}`}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1">{r.replace(/_/g, ' ')}</p>
+                    <p className={`text-[9px] leading-tight ${formData.role === r ? 'text-blue-100' : 'text-zinc-400'}`}>
+                      {r === 'ADMIN_OFFICER' && "Full system access & oversight."}
+                      {r === 'PROVINCIAL_COORDINATOR' && "Regional management & allocation."}
+                      {r === 'DATA_COLLECTION_OFFICER' && "Fieldwork & data capture."}
+                      {r === 'BUSINESS_CONSULTANT' && "Plan development & strategy."}
+                      {r === 'REVIEWER' && "Quality control & approvals."}
+                    </p>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Province</label>
-              <select 
-                value={formData.province}
-                onChange={(e) => setFormData({...formData, province: e.target.value as Province})}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-              >
-                <option value="">Head Office</option>
-                {Object.values(Province).map(p => (
-                  <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
-                ))}
-              </select>
+            
+            <div className="space-y-2 col-span-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Province (Regional Assignment)</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <select 
+                  value={formData.province}
+                  onChange={(e) => setFormData({...formData, province: e.target.value as Province})}
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                >
+                  <option value="">National / Head Office</option>
+                  {Object.values(Province).map(p => (
+                    <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
