@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, FileText, Receipt, X, Save } from "lucide-react";
+import { ArrowRight, CheckCircle2, FileText, Receipt, X, Save, Mail } from "lucide-react";
 import { CaseStatus, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSimulation } from "@/lib/SimulationContext";
 
 export default function FinanceActions({ 
@@ -112,14 +113,31 @@ export default function FinanceActions({
       )}
 
       {status === "INVOICED" && (
-        <button 
-          onClick={() => handleUpdate(CaseStatus.PAID)}
-          disabled={isSubmitting}
-          className="text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1"
-        >
-          Confirm Payment
-          <CheckCircle2 className="w-3 h-3" />
-        </button>
+        <div className="flex gap-2">
+          <Link 
+            href={`/finance/invoice/${caseId}`}
+            target="_blank"
+            className="text-xs font-bold text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 border border-zinc-200 dark:border-zinc-700"
+          >
+            Print
+            <FileText className="w-3 h-3" />
+          </Link>
+          <button 
+            onClick={() => handleUpdate(CaseStatus.INVOICED, { comments: "Invoice emailed to client" })}
+            className="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 border border-blue-100 dark:border-blue-900/30"
+          >
+            Email
+            <Mail className="w-3 h-3" />
+          </button>
+          <button 
+            onClick={() => handleUpdate(CaseStatus.PAID)}
+            disabled={isSubmitting}
+            className="text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1"
+          >
+            Confirm Payment
+            <CheckCircle2 className="w-3 h-3" />
+          </button>
+        </div>
       )}
 
       {status === "PAID" && (
