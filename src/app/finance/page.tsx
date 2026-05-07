@@ -70,9 +70,9 @@ export default async function FinancePage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
-              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Beneficiary</th>
-              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Province</th>
-              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Cost (ZAR)</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Beneficiary & Type</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Invoice No</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount (ZAR)</th>
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status</th>
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
@@ -83,13 +83,21 @@ export default async function FinancePage() {
                 <td className="px-8 py-6">
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{c.clientName}</span>
-                    <span className="text-[10px] text-zinc-400 font-mono tracking-tighter mt-1">{c.nydaReference || c.id.slice(0,12)}</span>
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">{c.outputType.replace(/_/g, ' ')}</span>
                   </div>
                 </td>
-                <td className="px-8 py-6 text-sm text-zinc-600 dark:text-zinc-400 font-medium">{c.province}</td>
+                <td className="px-8 py-6">
+                  {c.invoiceNumber ? (
+                    <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                      {c.invoiceNumber}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-300 italic">Pending</span>
+                  )}
+                </td>
                 <td className="px-8 py-6">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                    R {c.actualCost?.toLocaleString() || (Math.random() * 5000 + 1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    R {c.actualCost?.toLocaleString(undefined, {minimumFractionDigits: 2}) || '0.00'}
                   </span>
                 </td>
                 <td className="px-8 py-6">

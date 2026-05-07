@@ -64,14 +64,13 @@ export default function FinanceActions({
         </button>
       )}
 
-      {status === "READY_FOR_INVOICING" && !showInvoiceForm && (
+      {(status === "CLIENT_APPROVED" || status === "READY_FOR_INVOICING") && !showInvoiceForm && (
         <button 
           onClick={() => setShowInvoiceForm(true)}
-          disabled={isSubmitting}
-          className="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1"
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
         >
+          <Receipt className="w-4 h-4" />
           Generate Invoice
-          <Receipt className="w-3 h-3" />
         </button>
       )}
 
