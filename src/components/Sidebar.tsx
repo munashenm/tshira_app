@@ -8,7 +8,9 @@ import {
   Settings, 
   LogOut,
   CalendarDays,
-  Receipt
+  Receipt,
+  TrendingDown,
+  UserCircle
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -40,7 +42,8 @@ export default function Sidebar() {
           <SidebarItem icon={<Users />} label="Clients" href="/clients" active={pathname.startsWith("/clients")} />
           <SidebarItem icon={<CalendarDays />} label="Requisitions" href="/requisitions" active={pathname === "/requisitions"} />
           <SidebarItem icon={<Receipt />} label="Finance" href="/finance" active={pathname === "/finance"} />
-          <SidebarItem icon={<Users />} label="Team" href="/team" active={pathname === "/team"} />
+          <SidebarItem icon={<TrendingDown />} label="Expenses" href="/expenses" active={pathname === "/expenses"} />
+          <SidebarItem icon={<UserCircle />} label="Team" href="/team" active={pathname === "/team"} />
           <SidebarItem icon={<FileText />} label="Reports" href="/reports" active={pathname === "/reports"} />
         </nav>
       </div>
