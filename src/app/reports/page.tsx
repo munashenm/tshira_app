@@ -58,6 +58,13 @@ export default async function ReportsPage() {
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Live operational performance metrics across all 6 provinces.</p>
         </div>
         <div className="flex gap-3">
+          <Link
+            href="/reports/dco"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all"
+          >
+            <User className="w-4 h-4" />
+            DCO Client List
+          </Link>
           <a
             href="/api/export/cases"
             className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 transition-all"
