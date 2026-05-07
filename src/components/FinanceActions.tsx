@@ -47,7 +47,8 @@ export default function FinanceActions({
     }
   };
 
-  const isFinance = currentPersona?.role === Role.FINANCE || currentPersona?.role === Role.ADMIN_OFFICER;
+  // For demo and staging, we allow Admin and Finance roles to manage invoicing.
+  const isFinance = currentPersona?.role === "FINANCE" || currentPersona?.role === "ADMIN_OFFICER";
 
   if (!isFinance) return null;
 

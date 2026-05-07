@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import EditUserModal from "@/components/EditUserModal";
+import AddUserModal from "@/components/AddUserModal";
 
 export default async function TeamPage() {
   const users = await prisma.user.findMany({
@@ -28,10 +29,7 @@ export default async function TeamPage() {
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Team Management</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage user roles, provincial assignments, and system access.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
-          <UserPlus className="w-5 h-5" />
-          Add Team Member
-        </button>
+        <AddUserModal />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -23,3 +23,25 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { name, email, password, role, province } = body;
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password,
+        role,
+        province,
+      },
+    });
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return NextResponse.json({ error: "Failed to create user. Email might already exist." }, { status: 500 });
+  }
+}
