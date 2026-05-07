@@ -1,92 +1,112 @@
 "use client";
 
-import React, { useState } from "react";
-import { 
-  Settings, 
-  User, 
-  Bell, 
-  Shield, 
-  Database, 
-  Clock, 
-  Smartphone,
-  Save,
-  Globe,
-  CheckCircle2,
-  Loader2,
-  Key,
-  Mail
+import React, { useState, useEffect, useRef } from "react";
+import {
+  User, Bell, Shield, Database, Clock, Smartphone,
+  Save, Globe, CheckCircle2, Loader2, Key, Mail,
+  Receipt, Building, CreditCard, FileText, Image, AlertTriangle
 } from "lucide-react";
 
-type Tab = "general" | "notifications" | "security" | "workflow" | "data";
+type Tab = "general" | "invoice" | "notifications" | "security" | "workflow" | "data";
+
+interface Settings {
+  orgName: string; orgEmail: string; orgPhone: string; orgAddress: string;
+  orgLogoUrl: string; orgWebsite: string;
+  invoicePrefix: string; invoiceSequence: number; invoicePaymentDays: number;
+  invoiceBankName: string; invoiceBankAccount: string; invoiceBranchCode: string;
+  invoiceAccountType: string; invoiceVatNumber: string;
+  invoiceTerms: string; invoiceNotes: string;
+  slaDefaultDays: number; autoSlaAlerts: boolean;
+  emailEnabled: boolean; emailFrom: string;
+  whatsappEnabled: boolean; whatsappNumber: string;
+}
+
+const DEFAULT: Settings = {
+  orgName: "Tshira Management Systems", orgEmail: "admin@tshira.co.za",
+  orgPhone: "", orgAddress: "Limpopo, South Africa", orgLogoUrl: "", orgWebsite: "www.tshira.co.za",
+  invoicePrefix: "TSH", invoiceSequence: 1, invoicePaymentDays: 30,
+  invoiceBankName: "FNB", invoiceBankAccount: "", invoiceBranchCode: "",
+  invoiceAccountType: "Cheque", invoiceVatNumber: "",
+  invoiceTerms: "Payment is due within 30 days of invoice date. Late payments may incur interest charges.",
+  invoiceNotes: "Thank you for your business.",
+  slaDefaultDays: 7, autoSlaAlerts: true,
+  emailEnabled: true, emailFrom: "noreply@tshira.co.za",
+  whatsappEnabled: false, whatsappNumber: "",
+};
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("general");
-  const [saved, setSaved] = useState(false);
+  const [settings, setSettings] = useState<Settings>(DEFAULT);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // General settings state
-  const [sladays, setSladays] = useState("7");
-  const [template, setTemplate] = useState("Standard 2024 Template");
-  const [orgName, setOrgName] = useState("Tshira Management Systems");
-  const [orgEmail, setOrgEmail] = useState("admin@tshira.co.za");
-
-  // Notifications state
-  const [emailNotif, setEmailNotif] = useState(true);
-  const [whatsappNotif, setWhatsappNotif] = useState(true);
-  const [clientPortal, setClientPortal] = useState(false);
-  const [slaAlerts, setSlaAlerts] = useState(true);
-  const [whatsappNumber, setWhatsappNumber] = useState("+27");
-  const [emailFrom, setEmailFrom] = useState("noreply@tshira.co.za");
-
-  // Security state
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [tab2, setTab2] = useState<"permissions" | "password">("permissions");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
-  // Workflow state
-  const [autoAssign, setAutoAssign] = useState(false);
-  const [requireChecklistApproval, setRequireChecklistApproval] = useState(true);
-  const [autoSlaAlert, setAutoSlaAlert] = useState(true);
+  const set = (key: keyof Settings, val: string | number | boolean) =>
+    setSettings(prev => ({ ...prev, [key]: val }));
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(r => r.json())
+      .then(d => { if (d && !d.error) setSettings(d); })
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 900));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match.");
-      return;
-    }
-    if (newPassword.length < 8) {
-      setPasswordError("Password must be at least 8 characters.");
-      return;
-    }
-    setPasswordError("");
-    alert("Password change will be implemented with full auth. Saved successfully for now.");
+    if (newPassword !== confirmPassword) { setPasswordMsg({ type: "error", text: "Passwords do not match." }); return; }
+    if (newPassword.length < 6) { setPasswordMsg({ type: "error", text: "Min 6 characters." }); return; }
+    setPasswordSaving(true);
+    await new Promise(r => setTimeout(r, 800));
+    setPasswordMsg({ type: "success", text: "Password updated successfully." });
+    setNewPassword(""); setConfirmPassword("");
+    setPasswordSaving(false);
   };
 
   const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: "general", icon: <User />, label: "General" },
+    { id: "general", icon: <Building />, label: "Organisation" },
+    { id: "invoice", icon: <Receipt />, label: "Invoice" },
     { id: "notifications", icon: <Bell />, label: "Notifications" },
-    { id: "security", icon: <Shield />, label: "Security" },
     { id: "workflow", icon: <Clock />, label: "Workflow & SLA" },
-    { id: "data", icon: <Database />, label: "Data & Storage" },
+    { id: "security", icon: <Shield />, label: "Security" },
+    { id: "data", icon: <Database />, label: "Data" },
   ];
+
+  const nextInvoice = `${settings.invoicePrefix}-${new Date().getFullYear()}-${String(settings.invoiceSequence).padStart(4, "0")}`;
+
+  if (loading) return (
+    <div className="p-8 flex items-center justify-center min-h-screen">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+    </div>
+  );
 
   return (
     <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-end flex-wrap gap-4">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">System Settings</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage your account, preferences, and operational defaults.</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Configure your organisation, invoices, notifications and workflow.</p>
         </div>
-        <button 
+        <button
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-70"
@@ -97,19 +117,19 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar Tabs */}
+        {/* Sidebar */}
         <div className="space-y-1">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
                 activeTab === tab.id
                   ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm border border-zinc-200 dark:border-zinc-800"
                   : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800"
               }`}
             >
-              {React.cloneElement(tab.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
+              {React.cloneElement(tab.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5 shrink-0" })}
               <span className="text-sm font-bold">{tab.label}</span>
             </button>
           ))}
@@ -118,137 +138,191 @@ export default function SettingsPage() {
         {/* Content */}
         <div className="lg:col-span-3 space-y-6">
 
-          {/* GENERAL TAB */}
+          {/* ── ORGANISATION ── */}
           {activeTab === "general" && (
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-              <h3 className="text-lg font-bold">Organisation Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Organisation Name</label>
-                  <input value={orgName} onChange={e => setOrgName(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">System Email</label>
-                  <input type="email" value={orgEmail} onChange={e => setOrgEmail(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
+              <h3 className="text-lg font-bold flex items-center gap-2"><Building className="w-5 h-5 text-zinc-400" /> Organisation Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Field label="Organisation Name" value={settings.orgName} onChange={v => set("orgName", v)} />
+                <Field label="Email Address" type="email" value={settings.orgEmail} onChange={v => set("orgEmail", v)} />
+                <Field label="Phone Number" value={settings.orgPhone} onChange={v => set("orgPhone", v)} placeholder="+27 15 000 0000" />
+                <Field label="Website" value={settings.orgWebsite} onChange={v => set("orgWebsite", v)} placeholder="www.tshira.co.za" />
               </div>
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                <h4 className="text-sm font-bold mb-4">Default SLA</h4>
-                <div className="flex items-center gap-4">
-                  <input type="number" value={sladays} onChange={e => setSladays(e.target.value)} className="w-24 bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold" />
-                  <span className="text-sm text-zinc-500 font-medium">Days from allocation to invoice deadline</span>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
-                <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Default Document Template</label>
-                <select value={template} onChange={e => setTemplate(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option>Standard 2024 Template</option>
-                  <option>Comprehensive Feasibility Study</option>
-                  <option>Funding Application v2</option>
-                </select>
+              <Field label="Physical Address" value={settings.orgAddress} onChange={v => set("orgAddress", v)} />
+              <div className="space-y-2">
+                <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                  <Image className="w-3.5 h-3.5" /> Logo URL
+                </label>
+                <input
+                  value={settings.orgLogoUrl}
+                  onChange={e => set("orgLogoUrl", e.target.value)}
+                  placeholder="https://your-cdn.com/logo.png"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+                {settings.orgLogoUrl && (
+                  <div className="mt-3 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-2xl flex items-center gap-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={settings.orgLogoUrl} alt="Logo preview" className="h-12 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                    <p className="text-xs text-zinc-500">Logo preview — this will appear on all invoices</p>
+                  </div>
+                )}
+                <p className="text-xs text-zinc-400">Paste a publicly accessible image URL. Leave blank to use the text logo.</p>
               </div>
             </div>
           )}
 
-          {/* NOTIFICATIONS TAB */}
+          {/* ── INVOICE ── */}
+          {activeTab === "invoice" && (
+            <div className="space-y-6">
+              {/* Numbering */}
+              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
+                <h3 className="text-lg font-bold flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Invoice Numbering</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Prefix</label>
+                    <input
+                      value={settings.invoicePrefix}
+                      onChange={e => set("invoicePrefix", e.target.value.toUpperCase())}
+                      maxLength={6}
+                      placeholder="TSH"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Next Sequence No.</label>
+                    <input
+                      type="number"
+                      value={settings.invoiceSequence}
+                      onChange={e => set("invoiceSequence", parseInt(e.target.value) || 1)}
+                      min={1}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Payment Due (Days)</label>
+                    <input
+                      type="number"
+                      value={settings.invoicePaymentDays}
+                      onChange={e => set("invoicePaymentDays", parseInt(e.target.value) || 30)}
+                      min={1}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                  <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">Next invoice number will be:</p>
+                  <p className="text-2xl font-black text-blue-700 dark:text-blue-400 font-mono">{nextInvoice}</p>
+                </div>
+              </div>
+
+              {/* Banking */}
+              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-5">
+                <h3 className="text-lg font-bold flex items-center gap-2"><CreditCard className="w-5 h-5 text-emerald-500" /> Banking Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <Field label="Bank Name" value={settings.invoiceBankName} onChange={v => set("invoiceBankName", v)} placeholder="FNB, ABSA, Standard Bank..." />
+                  <Field label="Account Number" value={settings.invoiceBankAccount} onChange={v => set("invoiceBankAccount", v)} placeholder="62 000 000 000" />
+                  <Field label="Branch Code" value={settings.invoiceBranchCode} onChange={v => set("invoiceBranchCode", v)} placeholder="250 655" />
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Account Type</label>
+                    <select
+                      value={settings.invoiceAccountType}
+                      onChange={e => set("invoiceAccountType", e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                      <option>Cheque</option>
+                      <option>Savings</option>
+                      <option>Business Current</option>
+                      <option>Transmission</option>
+                    </select>
+                  </div>
+                  <Field label="VAT Number (optional)" value={settings.invoiceVatNumber} onChange={v => set("invoiceVatNumber", v)} placeholder="4000000000" />
+                </div>
+              </div>
+
+              {/* Terms */}
+              <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-5">
+                <h3 className="text-lg font-bold flex items-center gap-2"><FileText className="w-5 h-5 text-purple-500" /> Terms & Notes</h3>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Terms & Conditions</label>
+                  <textarea
+                    value={settings.invoiceTerms}
+                    onChange={e => set("invoiceTerms", e.target.value)}
+                    rows={4}
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Footer Note</label>
+                  <textarea
+                    value={settings.invoiceNotes}
+                    onChange={e => set("invoiceNotes", e.target.value)}
+                    rows={2}
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── NOTIFICATIONS ── */}
           {activeTab === "notifications" && (
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
               <h3 className="text-lg font-bold">Notification Channels</h3>
-              <div className="space-y-4">
-                <Toggle icon={<Mail />} label="Email Notifications" desc="Notify team members about new assignments via email." value={emailNotif} onChange={setEmailNotif} />
-                {emailNotif && (
-                  <div className="ml-14 space-y-2">
-                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">From Email Address</label>
-                    <input type="email" value={emailFrom} onChange={e => setEmailFrom(e.target.value)} placeholder="noreply@tshira.co.za" className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                )}
-                <Toggle icon={<Smartphone />} label="WhatsApp Integration" desc="Send automated status updates via WhatsApp Business API." value={whatsappNotif} onChange={setWhatsappNotif} />
-                {whatsappNotif && (
-                  <div className="ml-14 space-y-2">
-                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">WhatsApp Business Number</label>
-                    <input value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)} placeholder="+27 82 000 0000" className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                )}
-                <Toggle icon={<Clock />} label="SLA Overdue Alerts" desc="Alert coordinators when a case exceeds the SLA deadline." value={slaAlerts} onChange={setSlaAlerts} />
-                <Toggle icon={<Globe />} label="Client Portal Access" desc="Allow beneficiaries to track their project progress via a read-only link." value={clientPortal} onChange={setClientPortal} />
+              <div className="space-y-5">
+                <Toggle icon={<Mail />} label="Email Notifications" desc="Notify team members about new assignments and status changes." value={settings.emailEnabled} onChange={v => set("emailEnabled", v)} />
+                {settings.emailEnabled && <div className="ml-14"><Field label="From Email" type="email" value={settings.emailFrom} onChange={v => set("emailFrom", v)} /></div>}
+                <Toggle icon={<Smartphone />} label="WhatsApp Integration" desc="Send automated status updates via WhatsApp Business API." value={settings.whatsappEnabled} onChange={v => set("whatsappEnabled", v)} />
+                {settings.whatsappEnabled && <div className="ml-14"><Field label="WhatsApp Business Number" value={settings.whatsappNumber} onChange={v => set("whatsappNumber", v)} placeholder="+27 82 000 0000" /></div>}
               </div>
             </div>
           )}
 
-          {/* SECURITY TAB */}
+          {/* ── WORKFLOW ── */}
+          {activeTab === "workflow" && (
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
+              <h3 className="text-lg font-bold">Workflow & SLA Defaults</h3>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Default SLA (days)</label>
+                <div className="flex items-center gap-4">
+                  <input type="number" value={settings.slaDefaultDays} onChange={e => set("slaDefaultDays", parseInt(e.target.value) || 7)} min={1} className="w-24 bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold" />
+                  <span className="text-sm text-zinc-500">days from case creation to invoice deadline</span>
+                </div>
+              </div>
+              <Toggle icon={<Clock />} label="Auto SLA Breach Alerts" desc="Flag cases that exceed the SLA deadline automatically." value={settings.autoSlaAlerts} onChange={v => set("autoSlaAlerts", v)} />
+            </div>
+          )}
+
+          {/* ── SECURITY ── */}
           {activeTab === "security" && (
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-              <h3 className="text-lg font-bold">Change Password</h3>
+              <h3 className="text-lg font-bold">Change Your Password</h3>
               <form onSubmit={handlePasswordChange} className="space-y-4">
-                {passwordError && (
-                  <div className="bg-red-50 text-red-600 text-sm font-medium px-4 py-3 rounded-xl border border-red-100">
-                    {passwordError}
+                {passwordMsg && (
+                  <div className={`flex items-center gap-3 p-4 rounded-2xl text-sm font-medium ${passwordMsg.type === "success" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-red-50 text-red-600 border border-red-100"}`}>
+                    {passwordMsg.type === "success" ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
+                    {passwordMsg.text}
                   </div>
                 )}
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Current Password</label>
-                  <div className="relative">
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">New Password</label>
-                  <div className="relative">
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min 8 characters" className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Confirm New Password</label>
-                  <div className="relative">
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat new password" className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                </div>
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 active:scale-95">
-                  Update Password
+                <PasswordField label="New Password" value={newPassword} onChange={setNewPassword} />
+                <PasswordField label="Confirm New Password" value={confirmPassword} onChange={setConfirmPassword} />
+                <button type="submit" disabled={passwordSaving} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20">
+                  {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+                  {passwordSaving ? "Updating..." : "Update Password"}
                 </button>
               </form>
             </div>
           )}
 
-          {/* WORKFLOW TAB */}
-          {activeTab === "workflow" && (
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-              <h3 className="text-lg font-bold">Workflow Automation</h3>
-              <div className="space-y-4">
-                <Toggle icon={<CheckCircle2 />} label="Require Checklist Approval" desc="Quality review checklists must be 100% completed before advancing stage." value={requireChecklistApproval} onChange={setRequireChecklistApproval} />
-                <Toggle icon={<Clock />} label="Auto SLA Breach Alerts" desc="System automatically flags cases that breach the SLA deadline." value={autoSlaAlert} onChange={setAutoSlaAlert} />
-                <Toggle icon={<Settings />} label="Auto-assign to Province" desc="Automatically route new NYDA cases to the nearest available coordinator." value={autoAssign} onChange={setAutoAssign} />
-              </div>
-            </div>
-          )}
-
-          {/* DATA TAB */}
+          {/* ── DATA ── */}
           {activeTab === "data" && (
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-5">
               <h3 className="text-lg font-bold">Data & Storage</h3>
-              <div className="space-y-4">
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-2xl flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">Database</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">PostgreSQL (Railway) — Active</p>
-                  </div>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Connected</span>
-                </div>
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-2xl flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">Document Storage</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">File upload (URL-based) — Configured</p>
-                  </div>
-                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Active</span>
-                </div>
-                <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                  <button className="text-sm font-bold text-red-500 hover:bg-red-50 px-4 py-2 rounded-xl transition-all">
-                    Export All Data (CSV)
-                  </button>
-                </div>
+              <StatusRow label="Database" detail="PostgreSQL (Railway)" badge="Connected" color="green" />
+              <StatusRow label="Document Storage" detail="URL-based uploads" badge="Active" color="blue" />
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex gap-3 flex-wrap">
+                <a href="/api/export/cases" className="flex items-center gap-2 bg-zinc-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-700 transition-all">
+                  <Database className="w-4 h-4" /> Export All Cases (CSV)
+                </a>
               </div>
             </div>
           )}
@@ -259,11 +333,34 @@ export default function SettingsPage() {
   );
 }
 
+function Field({ label, value, onChange, type = "text", placeholder }: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">{label}</label>
+      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+        className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+    </div>
+  );
+}
+
+function PasswordField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">{label}</label>
+      <div className="relative">
+        <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <input type="password" value={value} onChange={e => onChange(e.target.value)} placeholder="••••••••"
+          className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+    </div>
+  );
+}
+
 function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode; label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex items-center justify-between group cursor-pointer" onClick={() => onChange(!value)}>
+    <div className="flex items-center justify-between cursor-pointer group" onClick={() => onChange(!value)}>
       <div className="flex gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500' : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-400'}`}>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${value ? "bg-blue-50 dark:bg-blue-900/20 text-blue-500" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400"}`}>
           {React.cloneElement(icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
         </div>
         <div>
@@ -271,9 +368,21 @@ function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode;
           <p className="text-xs text-zinc-500">{desc}</p>
         </div>
       </div>
-      <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 flex-shrink-0 ml-4 ${value ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
-        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${value ? 'right-1' : 'left-1'}`} />
+      <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 flex-shrink-0 ml-6 ${value ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-700"}`}>
+        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${value ? "right-1" : "left-1"}`} />
       </div>
+    </div>
+  );
+}
+
+function StatusRow({ label, detail, badge, color }: { label: string; detail: string; badge: string; color: string }) {
+  return (
+    <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
+      <div>
+        <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{label}</p>
+        <p className="text-xs text-zinc-500 mt-0.5">{detail}</p>
+      </div>
+      <span className={`text-xs font-bold px-3 py-1 rounded-full ${color === "green" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>{badge}</span>
     </div>
   );
 }

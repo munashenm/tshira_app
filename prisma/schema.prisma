@@ -174,3 +174,34 @@ model Requisition {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 }
+
+model SystemSettings {
+  id                  String   @id @default("singleton")
+  // Organisation
+  orgName             String   @default("Tshira Management Systems")
+  orgEmail            String   @default("admin@tshira.co.za")
+  orgPhone            String   @default("")
+  orgAddress          String   @default("Limpopo, South Africa")
+  orgLogoUrl          String   @default("")
+  orgWebsite          String   @default("www.tshira.co.za")
+  // Invoice
+  invoicePrefix       String   @default("TSH")
+  invoiceSequence     Int      @default(1)
+  invoicePaymentDays  Int      @default(30)
+  invoiceBankName     String   @default("FNB")
+  invoiceBankAccount  String   @default("")
+  invoiceBranchCode   String   @default("")
+  invoiceAccountType  String   @default("Cheque")
+  invoiceVatNumber    String   @default("")
+  invoiceTerms        String   @default("Payment is due within 30 days of invoice date. Late payments may incur interest charges.")
+  invoiceNotes        String   @default("Thank you for your business.")
+  // Workflow
+  slaDefaultDays      Int      @default(7)
+  autoSlaAlerts       Boolean  @default(true)
+  // Notifications
+  emailEnabled        Boolean  @default(true)
+  emailFrom           String   @default("noreply@tshira.co.za")
+  whatsappEnabled     Boolean  @default(false)
+  whatsappNumber      String   @default("")
+  updatedAt           DateTime @updatedAt
+}

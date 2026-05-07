@@ -1,28 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, FileText, Receipt, X, Save, Mail, Printer, MessageCircle } from "lucide-react";
+import { CheckCircle2, FileText, Receipt, X, Save, Mail, Printer, MessageCircle, Loader2 } from "lucide-react";
 import { CaseStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type DeliveryMethod = "email" | "whatsapp" | "print" | null;
 
-export default function FinanceActions({ 
-  caseId, 
-  status 
-}: { 
-  caseId: string; 
+export default function FinanceActions({
+  caseId,
+  status
+}: {
+  caseId: string;
   status: CaseStatus;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
-  const [showDelivery, setShowDelivery] = useState(false);
+  const [generatingNumber, setGeneratingNumber] = useState(false);
   const [invoiceDetails, setInvoiceDetails] = useState({
     invoiceNumber: "",
     actualCost: ""
   });
-  
+
   const router = useRouter();
 
   const handleUpdate = async (newStatus: CaseStatus, extraData: Record<string, unknown> = {}) => {
@@ -31,7 +31,7 @@ export default function FinanceActions({
       const res = await fetch(`/api/cases/${caseId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           status: newStatus,
           comments: `Finance update: Moved to ${newStatus}`,
           ...extraData
@@ -39,13 +39,28 @@ export default function FinanceActions({
       });
       if (res.ok) {
         setShowInvoiceForm(false);
-        setShowDelivery(false);
         router.refresh();
       }
     } catch (error) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleOpenInvoiceForm = async () => {
+    setGeneratingNumber(true);
+    try {
+      const res = await fetch("/api/invoices/generate", { method: "POST" });
+      if (res.ok) {
+        const { invoiceNumber } = await res.json();
+        setInvoiceDetails(prev => ({ ...prev, invoiceNumber }));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGeneratingNumber(false);
+      setShowInvoiceForm(true);
     }
   };
 
@@ -61,104 +76,105 @@ export default function FinanceActions({
 
   return (
     <div className="flex justify-end gap-2 relative">
-      {/* STEP 1: Show Generate Invoice for any case not yet invoiced */}
+      {/* Generate Invoice — for any uninvoiced case */}
       {(status !== "INVOICED" && status !== "PAID" && status !== "CLOSED") && !showInvoiceForm && (
-        <button 
-          onClick={() => setShowInvoiceForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+        <button
+          onClick={handleOpenInvoiceForm}
+          disabled={generatingNumber}
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-60"
         >
-          <Receipt className="w-4 h-4" />
-          Generate Invoice
+          {generatingNumber ? <Loader2 className="w-4 h-4 animate-spin" /> : <Receipt className="w-4 h-4" />}
+          {generatingNumber ? "Generating..." : "Generate Invoice"}
         </button>
       )}
 
-      {/* STEP 2: Invoice creation form */}
+      {/* Invoice form with auto-generated number */}
       {showInvoiceForm && (
-        <div className="absolute right-0 bottom-full mb-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 z-50 animate-in slide-in-from-bottom-2">
+        <div className="absolute right-0 bottom-full mb-2 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 z-50 animate-in slide-in-from-bottom-2">
           <div className="flex justify-between items-center mb-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Invoice Details</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Create Invoice</h4>
             <button onClick={() => setShowInvoiceForm(false)} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
               <X className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-3">
-            <input 
-              placeholder="Invoice Number (e.g. INV-001)" 
-              value={invoiceDetails.invoiceNumber}
-              onChange={(e) => setInvoiceDetails({...invoiceDetails, invoiceNumber: e.target.value})}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-            <input 
-              type="number"
-              placeholder="Amount (ZAR)" 
-              value={invoiceDetails.actualCost}
-              onChange={(e) => setInvoiceDetails({...invoiceDetails, actualCost: e.target.value})}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-            <p className="text-[10px] text-zinc-400 font-medium">Delivery method will be selected after saving.</p>
-            <button 
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Invoice Number</label>
+              <div className="relative">
+                <input
+                  placeholder="Auto-generated"
+                  value={invoiceDetails.invoiceNumber}
+                  onChange={(e) => setInvoiceDetails({ ...invoiceDetails, invoiceNumber: e.target.value })}
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold text-blue-700"
+                />
+              </div>
+              <p className="text-[10px] text-zinc-400">Auto-generated — edit if needed</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount (ZAR)</label>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={invoiceDetails.actualCost}
+                onChange={(e) => setInvoiceDetails({ ...invoiceDetails, actualCost: e.target.value })}
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <button
               disabled={!invoiceDetails.invoiceNumber || !invoiceDetails.actualCost || isSubmitting}
-              onClick={() => handleUpdate(CaseStatus.INVOICED, { 
-                invoiceNumber: invoiceDetails.invoiceNumber, 
+              onClick={() => handleUpdate(CaseStatus.INVOICED, {
+                invoiceNumber: invoiceDetails.invoiceNumber,
                 actualCost: parseFloat(invoiceDetails.actualCost),
                 invoiceDate: new Date()
               })}
               className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-blue-700 transition-all"
             >
-              <Save className="w-3 h-3" />
-              Save Invoice
+              {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              {isSubmitting ? "Saving..." : "Save & Mark Invoiced"}
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Delivery options after invoicing */}
+      {/* Delivery options after invoicing */}
       {status === "INVOICED" && (
-        <div className="flex gap-2 items-center">
-          <Link 
+        <div className="flex gap-2 items-center flex-wrap justify-end">
+          <Link
             href={`/finance/invoice/${caseId}`}
             target="_blank"
             className="text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 border border-zinc-200 dark:border-zinc-700"
-            title="Print Invoice"
           >
-            <Printer className="w-3.5 h-3.5" />
-            Print
+            <Printer className="w-3.5 h-3.5" /> Print
           </Link>
-          <button 
+          <button
             onClick={() => handleDelivery("whatsapp")}
             className="text-xs font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-900/30"
-            title="Send via WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
-            WhatsApp
+            <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
           </button>
-          <button 
+          <button
             onClick={() => handleDelivery("email")}
             className="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 border border-blue-100 dark:border-blue-900/30"
-            title="Send via Email"
           >
-            <Mail className="w-3.5 h-3.5" />
-            Email
+            <Mail className="w-3.5 h-3.5" /> Email
           </button>
-          <button 
+          <button
             onClick={() => handleUpdate(CaseStatus.PAID)}
             disabled={isSubmitting}
             className="text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Confirm Paid
+            <CheckCircle2 className="w-3.5 h-3.5" /> Confirm Paid
           </button>
         </div>
       )}
 
       {status === "PAID" && (
-        <button 
+        <button
           onClick={() => handleUpdate(CaseStatus.CLOSED)}
           disabled={isSubmitting}
           className="text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
         >
-          <FileText className="w-3.5 h-3.5" />
-          Close Case
+          <FileText className="w-3.5 h-3.5" /> Close Case
         </button>
       )}
     </div>
