@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { CaseStatus, Province, User } from "@prisma/client";
 import BulkAssignmentModal from "@/components/BulkAssignmentModal";
+import CreateCaseForm from "@/components/CreateCaseForm";
 
 type CaseWithRelations = any; // We'll fetch client-side for interactivity
 
@@ -112,6 +113,7 @@ export default function CasesPage() {
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage and track {cases.length} NYDA projects across South Africa.</p>
         </div>
         <div className="flex gap-3">
+          <CreateCaseForm provinces={Object.values(Province)} />
           <button 
             onClick={simulateImport}
             disabled={isImporting}

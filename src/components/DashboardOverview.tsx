@@ -18,6 +18,7 @@ import {
 import { Province, CaseStatus, Role } from "@prisma/client";
 import Link from "next/link";
 import { useSimulation } from "@/lib/SimulationContext";
+import CreateCaseForm from "./CreateCaseForm";
 
 interface DashboardStats {
   totalCases: number;
@@ -83,6 +84,7 @@ export default function DashboardOverview() {
           </p>
         </div>
         <div className="flex gap-3">
+          <CreateCaseForm provinces={Object.values(Province)} />
           <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center gap-4">
             <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-500">
               <TrendingUp className="w-6 h-6" />
