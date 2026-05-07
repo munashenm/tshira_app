@@ -72,6 +72,13 @@ export default async function ReportsPage() {
             <BarChart3 className="w-4 h-4" />
             PC Recording
           </Link>
+          <Link
+            href="/reports/finance"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all"
+          >
+            <DollarSign className="w-4 h-4" />
+            Finance Recon
+          </Link>
           <a
             href="/api/export/cases"
             className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-xl text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 transition-all"
