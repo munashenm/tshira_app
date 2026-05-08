@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, MoreVertical } from "lucide-react";
 import { RequisitionStatus, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useSimulation } from "@/lib/SimulationContext";
+import { getClientActor } from "@/lib/client-auth";
 
 export default function RequisitionActions({ 
   id, 
@@ -20,12 +21,14 @@ export default function RequisitionActions({
   const handleAction = async (newStatus: RequisitionStatus) => {
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/requisitions/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           status: newStatus,
-          approvedById: "demo-admin-id" // In real app from session
+          approvedById: actor?.id,
+          userId: actor?.id
         }),
       });
       if (res.ok) {

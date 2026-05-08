@@ -75,6 +75,19 @@ export async function GET(request: Request) {
       orderBy: { createdAt: 'desc' }
     });
 
+    // 7. Advanced Metrics
+    const pendingReviews = await prisma.case.count({
+      where: { status: { in: ['PROVINCIAL_QUALITY_CHECK', 'SUBMITTED_FOR_REVIEW'] } }
+    });
+
+    const pendingDataCollection = await prisma.case.count({
+      where: { status: { in: ['ASSIGNED_FOR_DATA_COLLECTION', 'DATA_COLLECTION_IN_PROGRESS'] } }
+    });
+
+    const readyForInvoicing = await prisma.case.count({
+      where: { status: 'READY_FOR_INVOICING' }
+    });
+
     return NextResponse.json({
       totalCases: await prisma.case.count(),
       overdueCount,
@@ -82,7 +95,12 @@ export async function GET(request: Request) {
       statusCounts,
       provinceStats,
       recentActivity,
-      myTasks
+      myTasks,
+      metrics: {
+        pendingReviews,
+        pendingDataCollection,
+        readyForInvoicing
+      }
     });
   } catch (error) {
     console.error("Dashboard API error:", error);

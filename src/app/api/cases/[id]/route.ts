@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { CaseStatus } from "@prisma/client";
+import { CaseStatus, Role } from "@prisma/client";
 import { sendNotification, notificationTemplates } from "@/lib/notifications";
+import { requireActor, requireRoles, validateAssignmentPermission, validateStatusTransition } from "@/lib/authz";
 
 export async function GET(
   request: Request,
@@ -36,6 +37,9 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
     const { 
       status, 
       coordinatorId, 
@@ -58,6 +62,40 @@ export async function PATCH(
       dateCompleted,
       clientUpdate
     } = body;
+
+    const targetCase = await prisma.case.findUnique({
+      where: { id },
+      select: { id: true, status: true, province: true, coordinatorId: true, dcoId: true, consultantId: true, reviewerId: true },
+    });
+
+    if (!targetCase) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province !== targetCase.province) {
+      return NextResponse.json({ error: "Forbidden: coordinator can only update cases in their province." }, { status: 403 });
+    }
+
+    const assignmentFields: Array<"coordinatorId" | "dcoId" | "consultantId" | "reviewerId"> = [];
+    if (coordinatorId !== undefined) assignmentFields.push("coordinatorId");
+    if (dcoId !== undefined) assignmentFields.push("dcoId");
+    if (consultantId !== undefined) assignmentFields.push("consultantId");
+    if (reviewerId !== undefined) assignmentFields.push("reviewerId");
+
+    if (assignmentFields.length > 0) {
+      const assignmentError = validateAssignmentPermission(auth.context, assignmentFields);
+      if (assignmentError) return assignmentError;
+    }
+
+    if (status) {
+      const statusError = validateStatusTransition(auth.context, targetCase.status, status as CaseStatus);
+      if (statusError) return statusError;
+    }
+
+    const roleErrorForFinancialUpdates =
+      (invoiceNumber !== undefined || invoiceDate !== undefined || actualCost !== undefined) &&
+      requireRoles(auth.context, [Role.FINANCE, Role.ADMIN_OFFICER]);
+    if (roleErrorForFinancialUpdates) return roleErrorForFinancialUpdates;
 
     // First update the case
     const updatedCase = await prisma.case.update({
@@ -82,7 +120,7 @@ export async function PATCH(
           create: {
             status: status as CaseStatus,
             comments: comments || "Status updated",
-            userId: userId
+            userId: userId || auth.context.actor.id
           }
         } : undefined,
         // Update the client if business data is provided

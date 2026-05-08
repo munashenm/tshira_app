@@ -5,6 +5,7 @@ import { CheckCircle2, FileText, Receipt, X, Save, Mail, Printer, MessageCircle,
 import { CaseStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getClientActor } from "@/lib/client-auth";
 
 type DeliveryMethod = "email" | "whatsapp" | "print" | null;
 
@@ -28,11 +29,13 @@ export default function FinanceActions({
   const handleUpdate = async (newStatus: CaseStatus, extraData: Record<string, unknown> = {}) => {
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/cases/${caseId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: newStatus,
+          userId: actor?.id,
           comments: `Finance update: Moved to ${newStatus}`,
           ...extraData
         }),
@@ -51,7 +54,11 @@ export default function FinanceActions({
   const handleOpenInvoiceForm = async () => {
     setGeneratingNumber(true);
     try {
-      const res = await fetch("/api/invoices/generate", { method: "POST" });
+      const actor = getClientActor();
+      const res = await fetch("/api/invoices/generate", {
+        method: "POST",
+        headers: actor?.id ? { "x-actor-id": actor.id } : undefined,
+      });
       if (res.ok) {
         const { invoiceNumber } = await res.json();
         setInvoiceDetails(prev => ({ ...prev, invoiceNumber }));

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Plus, Calendar, MapPin, Info } from "lucide-react";
 import { Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { getClientActor } from "@/lib/client-auth";
 
 export default function CreateRequisitionModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,11 +26,13 @@ export default function CreateRequisitionModal() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch("/api/requisitions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          userId: actor?.id,
           province: selectedProvince,
           dateTime: new Date(formData.dateTime).toISOString(),
         }),

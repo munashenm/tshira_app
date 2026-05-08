@@ -14,9 +14,27 @@ export default function LoginPage() {
   const { setPersona } = useSimulation();
 
   useEffect(() => {
-    const auth = localStorage.getItem("tshira_auth");
-    if (auth) router.push("/");
-  }, [router]);
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        if (res.ok) {
+          const user = await res.json();
+          const persona = {
+            id: user.id,
+            name: user.name || user.email,
+            role: user.role,
+            province: user.province || null,
+          };
+          localStorage.setItem("tshira_auth", JSON.stringify(persona));
+          setPersona(persona);
+          router.push("/");
+        }
+      } catch {
+        // Stay on login.
+      }
+    };
+    void checkSession();
+  }, [router, setPersona]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

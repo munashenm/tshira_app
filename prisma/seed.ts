@@ -2,12 +2,15 @@ import "dotenv/config";
 import { PrismaClient, Role, Province } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { hashPassword } from "../src/lib/security";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  const defaultPasswordHash = await hashPassword("password123");
+
   // Create an Admin user
   const admin = await prisma.user.upsert({
     where: { email: "admin@tshira.co.za" },
@@ -16,7 +19,7 @@ async function main() {
       email: "admin@tshira.co.za",
       name: "Head Office Admin",
       role: Role.ADMIN_OFFICER,
-      password: "password123", // In a real app, hash this!
+      password: defaultPasswordHash,
     },
   });
 
@@ -29,7 +32,7 @@ async function main() {
       name: "Limpopo Coordinator",
       role: Role.PROVINCIAL_COORDINATOR,
       province: Province.LIMPOPO,
-      password: "password123",
+      password: defaultPasswordHash,
     },
   });
 
@@ -42,7 +45,7 @@ async function main() {
       name: "Limpopo DCO",
       role: Role.DATA_COLLECTION_OFFICER,
       province: Province.LIMPOPO,
-      password: "password123",
+      password: defaultPasswordHash,
     },
   });
 

@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { RequisitionStatus } from "@prisma/client";
+import { RequisitionStatus, Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireActor(request);
+  if (!auth.ok) return auth.response;
+
   const requisitions = await prisma.requisition.findMany({
     include: { user: true },
     orderBy: { createdAt: 'desc' }
@@ -13,20 +17,20 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { province, location, dateTime, purpose, isClientVisit, estimatedCost, userId } = body;
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
 
-    // For demo purposes, we'll use a fixed user ID if none provided
-    // In a real app, this would come from Auth session
-    let actualUserId = userId;
-    if (!actualUserId || actualUserId === "demo-user-id") {
-      const demoUser = await prisma.user.findFirst({
-        where: { role: 'PROVINCIAL_COORDINATOR' }
-      });
-      actualUserId = demoUser?.id;
+    const roleError = requireRoles(auth.context, [Role.PROVINCIAL_COORDINATOR, Role.DATA_COLLECTION_OFFICER]);
+    if (roleError) return roleError;
+
+    const { province, location, dateTime, purpose, isClientVisit, estimatedCost } = body;
+
+    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province && auth.context.actor.province !== province) {
+      return NextResponse.json({ error: "Forbidden: coordinator can only create requisitions in their province." }, { status: 403 });
     }
 
-    if (!actualUserId) {
-        return NextResponse.json({ error: "No suitable user found for assignment" }, { status: 400 });
+    if (auth.context.actor.role === Role.DATA_COLLECTION_OFFICER && auth.context.actor.province && auth.context.actor.province !== province) {
+      return NextResponse.json({ error: "Forbidden: DCO can only create requisitions in their province." }, { status: 403 });
     }
 
     const requisition = await prisma.requisition.create({
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
         purpose,
         isClientVisit,
         estimatedCost,
-        userId: actualUserId,
+        userId: auth.context.actor.id,
         status: RequisitionStatus.SUBMITTED
       }
     });

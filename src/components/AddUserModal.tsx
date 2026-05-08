@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Shield, MapPin, UserPlus, Mail, Save, User, Key } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { getClientActor } from "@/lib/client-auth";
 
 export default function AddUserModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,11 +22,13 @@ export default function AddUserModal() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          userId: actor?.id,
           province: formData.province || null
         }),
       });

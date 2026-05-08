@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
@@ -10,13 +10,31 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
   const isLoginPage = pathname === "/login";
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Basic auth check
-    const auth = localStorage.getItem("tshira_auth");
-    if (!auth && !isLoginPage) {
-      router.push("/login");
-    }
+    if (isLoginPage) return;
+    let cancelled = false;
+
+    const verifySession = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        if (!res.ok && !cancelled) {
+          localStorage.removeItem("tshira_auth");
+          router.push("/login");
+        }
+      } catch {
+        if (!cancelled) {
+          localStorage.removeItem("tshira_auth");
+          router.push("/login");
+        }
+      }
+    };
+
+    void verifySession();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname, isLoginPage, router]);
 
   if (isLoginPage) {
@@ -26,11 +44,13 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   return (
     <div className="flex min-h-screen">
       <CommandPalette />
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <TopNav />
+        <TopNav onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          {children}
+          <div className="p-4 lg:p-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
