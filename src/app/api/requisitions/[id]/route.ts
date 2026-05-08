@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 import { RequisitionStatus, Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
 
+const APPROVAL_STATUSES: RequisitionStatus[] = [
+  RequisitionStatus.APPROVED,
+  RequisitionStatus.REJECTED,
+  RequisitionStatus.BOOKED,
+];
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -22,8 +28,9 @@ export async function PATCH(
 
     const { status, approvedById } = body;
     const nextStatus = status as RequisitionStatus;
+    const isApprovalTransition = APPROVAL_STATUSES.includes(nextStatus);
 
-    if ([RequisitionStatus.APPROVED, RequisitionStatus.REJECTED, RequisitionStatus.BOOKED].includes(nextStatus)) {
+    if (isApprovalTransition) {
       const approverRoleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.FINANCE]);
       if (approverRoleError) return approverRoleError;
     } else if (auth.context.actor.id !== current.userId && auth.context.actor.role !== Role.ADMIN_OFFICER) {
@@ -33,13 +40,9 @@ export async function PATCH(
     const requisition = await prisma.requisition.update({
       where: { id },
       data: {
-        status: status as RequisitionStatus,
-        approvedById: approvedById || (
-          [RequisitionStatus.APPROVED, RequisitionStatus.REJECTED, RequisitionStatus.BOOKED].includes(nextStatus)
-            ? auth.context.actor.id
-            : undefined
-        )
-      }
+        status: nextStatus,
+        approvedById: approvedById || (isApprovalTransition ? auth.context.actor.id : undefined),
+      },
     });
 
     return NextResponse.json(requisition);
