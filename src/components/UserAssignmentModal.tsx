@@ -57,16 +57,20 @@ export default function UserAssignmentModal({
 
   const handleAssign = async (userId: string) => {
     setIsSubmitting(true);
-    const fieldMap: Record<Role, string> = {
+    const fieldMap: Partial<Record<Role, string>> = {
       PROVINCIAL_COORDINATOR: "coordinatorId",
       DATA_COLLECTION_OFFICER: "dcoId",
       BUSINESS_CONSULTANT: "consultantId",
       REVIEWER: "reviewerId",
       ADMIN_OFFICER: "adminId",
-      FINANCE: "financeId"
+      FINANCE: "financeId",
     };
 
     const field = fieldMap[role];
+    if (!field) {
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const actor = getClientActor();
       const res = await fetch(`/api/cases/${caseId}`, {
