@@ -5,6 +5,7 @@ import { X, UserPlus, Search, CheckCircle2 } from "lucide-react";
 import { Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useSimulation } from "@/lib/SimulationContext";
+import { getClientActor } from "@/lib/client-auth";
 
 interface User {
   id: string;
@@ -40,7 +41,9 @@ export default function UserAssignmentModal({
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/users?role=${role}`);
+      const actor = getClientActor();
+      const actorId = actor?.id ? `&actorId=${encodeURIComponent(actor.id)}` : "";
+      const res = await fetch(`/api/users?role=${role}${actorId}`);
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -65,10 +68,11 @@ export default function UserAssignmentModal({
 
     const field = fieldMap[role];
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/cases/${caseId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: userId }),
+        body: JSON.stringify({ [field]: userId, userId: actor?.id }),
       });
       if (res.ok) {
         setIsOpen(false);

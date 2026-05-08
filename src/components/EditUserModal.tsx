@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Shield, MapPin, Save, Key, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { getClientActor } from "@/lib/client-auth";
 
 export default function EditUserModal({ user }: { user: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,10 +21,11 @@ export default function EditUserModal({ user }: { user: any }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, province: province || null }),
+        body: JSON.stringify({ role, province: province || null, userId: actor?.id }),
       });
       if (res.ok) {
         setIsOpen(false);
@@ -46,10 +48,11 @@ export default function EditUserModal({ user }: { user: any }) {
     }
     setIsSubmitting(true);
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ password: newPassword, userId: actor?.id }),
       });
       if (res.ok) {
         setPasswordMsg({ type: "success", text: "Password updated successfully." });

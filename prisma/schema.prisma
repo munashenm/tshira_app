@@ -16,15 +16,19 @@ enum Role {
   BUSINESS_CONSULTANT
   REVIEWER
   FINANCE
+  NYDA
 }
 
 enum Province {
+  GAUTENG
+  KWAZULU_NATAL
   LIMPOPO
   MPUMALANGA
-  GAUTENG
   NORTH_WEST
-  FREE_STATE
   NORTHERN_CAPE
+  WESTERN_CAPE
+  EASTERN_CAPE
+  FREE_STATE
 }
 
 enum CaseStatus {
@@ -132,6 +136,18 @@ model Case {
 
   history             CaseHistory[]
   formResponses       FormResponse[]
+  notifications       Notification[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  caseId    String?
+  case      Case?    @relation(fields: [caseId], references: [id])
+  type      String   // ASSIGNMENT, STATUS_CHANGE, OVERDUE, REQUISITION
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Client {

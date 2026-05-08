@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, UserPlus, Search, CheckCircle2, Loader2, Users } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { getClientActor } from "@/lib/client-auth";
 
 interface User {
   id: string;
@@ -39,7 +40,9 @@ export default function BulkAssignmentModal({
   const fetchUsers = async (role: Role) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/users?role=${role}`);
+      const actor = getClientActor();
+      const actorId = actor?.id ? `&actorId=${encodeURIComponent(actor.id)}` : "";
+      const res = await fetch(`/api/users?role=${role}${actorId}`);
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -64,11 +67,13 @@ export default function BulkAssignmentModal({
 
     const field = fieldMap[selectedRole];
     try {
+      const actor = getClientActor();
       const res = await fetch(`/api/cases/bulk`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           caseIds,
+          userId: actor?.id,
           [field!]: userId,
           comments: `Bulk assigned to ${selectedRole.replace(/_/g, ' ')}`
         }),

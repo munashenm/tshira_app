@@ -1,8 +1,15 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
 
 export async function GET(request: Request) {
+  const auth = await requireActor(request);
+  if (!auth.ok) return auth.response;
+
+  const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.PROVINCIAL_COORDINATOR]);
+  if (roleError) return roleError;
+
   const { searchParams } = new URL(request.url);
   const role = searchParams.get("role") as Role;
 
@@ -26,6 +33,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER]);
+    if (roleError) return roleError;
+
     const body = await request.json();
     const { name, email, password, role, province } = body;
 

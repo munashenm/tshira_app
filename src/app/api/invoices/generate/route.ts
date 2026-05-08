@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
 
 // POST /api/invoices/generate — atomically increments sequence and returns next invoice number
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const roleError = requireRoles(auth.context, [Role.FINANCE, Role.ADMIN_OFFICER]);
+    if (roleError) return roleError;
+
     const settings = await prisma.systemSettings.upsert({
       where: { id: "singleton" },
       create: { id: "singleton" },

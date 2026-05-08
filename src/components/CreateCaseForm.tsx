@@ -153,8 +153,21 @@ export default function CreateCaseForm({ provinces }: { provinces: string[] }) {
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Target Deadline</label>
               <div className="relative group">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors">
+                  <Calendar className="w-4 h-4" />
+                </span>
                 <input type="date" name="deadline" className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Supporting Documents (NYDA Voucher/Form)</label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  name="document" 
+                  className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+                />
               </div>
             </div>
           </div>

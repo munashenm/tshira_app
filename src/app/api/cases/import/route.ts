@@ -1,10 +1,18 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { Province, CaseStatus } from "@prisma/client";
+import { Province, CaseStatus, Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
 
 export async function POST(request: Request) {
   try {
-    const { cases } = await request.json(); // Array of case objects
+    const body = await request.json();
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.PROVINCIAL_COORDINATOR]);
+    if (roleError) return roleError;
+
+    const { cases } = body; // Array of case objects
 
     if (!Array.isArray(cases)) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });

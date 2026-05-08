@@ -1,9 +1,36 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { Province } from "@prisma/client";
+import { Province, Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
+
+export async function GET() {
+  try {
+    const cases = await prisma.case.findMany({
+      include: {
+        client: true,
+        coordinator: { select: { id: true, name: true, email: true } },
+        dco: { select: { id: true, name: true, email: true } },
+        consultant: { select: { id: true, name: true, email: true } },
+        reviewer: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(cases);
+  } catch (error) {
+    console.error("Error fetching cases:", error);
+    return NextResponse.json({ error: "Failed to fetch cases" }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.PROVINCIAL_COORDINATOR]);
+    if (roleError) return roleError;
+
     const formData = await request.formData();
     const nydaReference = formData.get("nydaReference") as string;
     const clientName = formData.get("clientName") as string;
@@ -54,6 +81,19 @@ export async function POST(request: Request) {
         status: "RECEIVED_FROM_NYDA",
       },
     });
+
+    const docFile = formData.get("document") as File;
+    if (docFile && docFile.name) {
+      await prisma.document.create({
+        data: {
+          caseId: newCase.id,
+          type: "NYDA_INFLOW_DOCUMENT",
+          name: docFile.name,
+          url: `/uploads/${docFile.name}`, // Placeholder path
+          uploadedBy: "NYDA_INTAKE"
+        }
+      });
+    }
 
     return NextResponse.json(newCase);
   } catch (error) {

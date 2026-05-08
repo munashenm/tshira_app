@@ -1,22 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, LogOut, ChevronDown, ShieldCheck, UserCircle } from "lucide-react";
+import { Bell, LogOut, ChevronDown, ShieldCheck, Menu } from "lucide-react";
 import { useSimulation, Persona } from "@/lib/SimulationContext";
 import { useRouter } from "next/navigation";
 import GlobalSearch from "./GlobalSearch";
 import { Role, Province } from "@prisma/client";
+import NotificationCenter from "./NotificationCenter";
 
-export default function TopNav() {
+interface TopNavProps {
+  onMenuClick: () => void;
+}
+
+export default function TopNav({ onMenuClick }: TopNavProps) {
   const { currentPersona, setPersona } = useSimulation();
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showPersonaSwitcher, setShowPersonaSwitcher] = useState(false);
   const router = useRouter();
 
   const handleSignOut = () => {
-    localStorage.removeItem("tshira_auth");
-    localStorage.removeItem("demo_persona");
-    router.push("/login");
+    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      localStorage.removeItem("tshira_auth");
+      localStorage.removeItem("demo_persona");
+      router.push("/login");
+    });
   };
 
   const personas: Persona[] = [
@@ -26,64 +32,35 @@ export default function TopNav() {
     { id: "cons-gau", name: "Gauteng Consultant", role: Role.BUSINESS_CONSULTANT, province: Province.GAUTENG },
     { id: "rev-1", name: "Senior Reviewer", role: Role.REVIEWER, province: null },
     { id: "fin-1", name: "Finance Manager", role: Role.FINANCE, province: null },
-  ];
-
-  const notifications = [
-    { id: 1, title: "New Case Assigned", message: "You have been assigned to NYDA-2024-001", time: "2m ago", unread: true },
-    { id: 2, title: "Document Returned", message: "Business Plan was returned for correction", time: "1h ago", unread: true },
-    { id: 3, title: "SLA Warning", message: "A case is approaching its SLA deadline", time: "3h ago", unread: false },
+    { id: "nyda-1", name: "NYDA Oversight", role: Role.NYDA, province: null },
   ];
 
   return (
-    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between gap-4">
-      <div className="flex-1 max-w-lg">
-        <GlobalSearch />
+    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-6 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        <button 
+          onClick={onMenuClick}
+          className="p-2 -ml-2 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg lg:hidden"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="flex-1 max-w-lg">
+          <GlobalSearch />
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 lg:gap-4">
         {/* Notification Bell */}
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all relative"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900" />
-          </button>
-
-          {showNotifications && (
-            <div className="absolute right-0 mt-4 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[24px] shadow-2xl p-6 z-50 animate-in slide-in-from-top-2">
-              <div className="flex justify-between items-center mb-6">
-                <h4 className="text-sm font-bold">Notifications</h4>
-                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Mark all read</button>
-              </div>
-              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                {notifications.map(n => (
-                  <div key={n.id} className="flex gap-4 group cursor-pointer">
-                    <div className={`w-2 h-2 mt-2 rounded-full shrink-0 ${n.unread ? "bg-blue-500" : "bg-transparent"}`} />
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 group-hover:text-blue-600 transition-colors">{n.title}</p>
-                      <p className="text-[11px] text-zinc-500 leading-relaxed">{n.message}</p>
-                      <p className="text-[10px] text-zinc-400 font-medium">{n.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-zinc-400 hover:text-zinc-600 transition-colors text-center">
-                View All Activity
-              </button>
-            </div>
-          )}
-        </div>
+        <NotificationCenter />
 
         {/* User Profile / Persona Switcher */}
-        <div className="flex items-center gap-3 pl-4 border-l border-zinc-100 dark:border-zinc-800 relative">
+        <div className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-4 border-l border-zinc-100 dark:border-zinc-800 relative">
           <button 
             onClick={() => setShowPersonaSwitcher(!showPersonaSwitcher)}
             className="text-right hidden sm:block hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 rounded-xl transition-all"
           >
             <div className="flex items-center gap-2">
-              <div>
+              <div className="hidden lg:block">
                 <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{currentPersona?.name || "Loading..."}</p>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{currentPersona?.role?.replace(/_/g, ' ')}</p>
               </div>
@@ -126,7 +103,7 @@ export default function TopNav() {
               </div>
             </div>
           )}
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-sm">
+          <div className="w-8 h-8 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-sm shrink-0">
             {currentPersona?.name?.charAt(0) || "?"}
           </div>
           <button
