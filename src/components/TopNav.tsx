@@ -49,12 +49,12 @@ export default function TopNav({ onMenuClick }: TopNavProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 lg:gap-4">
+      <div className="flex items-center gap-4 lg:gap-6">
         {/* Notification Bell */}
         <NotificationCenter />
 
         {/* User Profile / Persona Switcher */}
-        <div className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-4 border-l border-zinc-100 dark:border-zinc-800 relative">
+        <div className="flex items-center gap-3 lg:gap-4 pl-3 lg:pl-6 border-l border-zinc-100 dark:border-zinc-800 relative">
           <button 
             onClick={() => setShowPersonaSwitcher(!showPersonaSwitcher)}
             className="flex items-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1 sm:p-2 rounded-xl transition-all"
