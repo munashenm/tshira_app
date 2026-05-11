@@ -60,7 +60,8 @@ export async function PATCH(
       dateAllocatedToCoordinator,
       dateAllocatedToConsultant,
       dateCompleted,
-      clientUpdate
+      clientUpdate,
+      acceptAssignment // true for accept, false for decline
     } = body;
 
     const targetCase = await prisma.case.findUnique({
@@ -97,25 +98,42 @@ export async function PATCH(
       requireRoles(auth.context, [Role.FINANCE, Role.ADMIN_OFFICER]);
     if (roleErrorForFinancialUpdates) return roleErrorForFinancialUpdates;
 
+    const dataToUpdate: any = {
+      status: status as CaseStatus,
+      coordinatorId,
+      dcoId,
+      consultantId,
+      reviewerId,
+      comments,
+      beneficiaryDetails,
+      invoiceNumber,
+      invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
+      actualCost,
+      adminOffice,
+      voucherAppNumber,
+      dateAllocatedToCoordinator: dateAllocatedToCoordinator ? new Date(dateAllocatedToCoordinator) : undefined,
+      dateAllocatedToConsultant: dateAllocatedToConsultant ? new Date(dateAllocatedToConsultant) : undefined,
+      dateCompleted: dateCompleted ? new Date(dateCompleted) : undefined,
+    };
+
+    if (acceptAssignment !== undefined) {
+      if (acceptAssignment === true) {
+        if (targetCase.coordinatorId === auth.context.actor.id) dataToUpdate.coordinatorAcceptedAt = new Date();
+        if (targetCase.dcoId === auth.context.actor.id) dataToUpdate.dcoAcceptedAt = new Date();
+        if (targetCase.consultantId === auth.context.actor.id) dataToUpdate.consultantAcceptedAt = new Date();
+      } else if (acceptAssignment === false) {
+        // Decline
+        if (targetCase.coordinatorId === auth.context.actor.id) dataToUpdate.coordinatorId = null;
+        if (targetCase.dcoId === auth.context.actor.id) dataToUpdate.dcoId = null;
+        if (targetCase.consultantId === auth.context.actor.id) dataToUpdate.consultantId = null;
+      }
+    }
+
     // First update the case
     const updatedCase = await prisma.case.update({
       where: { id },
       data: {
-        status: status as CaseStatus,
-        coordinatorId,
-        dcoId,
-        consultantId,
-        reviewerId,
-        comments,
-        beneficiaryDetails,
-        invoiceNumber,
-        invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
-        actualCost,
-        adminOffice,
-        voucherAppNumber,
-        dateAllocatedToCoordinator: dateAllocatedToCoordinator ? new Date(dateAllocatedToCoordinator) : undefined,
-        dateAllocatedToConsultant: dateAllocatedToConsultant ? new Date(dateAllocatedToConsultant) : undefined,
-        dateCompleted: dateCompleted ? new Date(dateCompleted) : undefined,
+        ...dataToUpdate,
         history: status ? {
           create: {
             status: status as CaseStatus,
