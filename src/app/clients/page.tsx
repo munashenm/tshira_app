@@ -75,6 +75,12 @@ export default async function ClientsPage({
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-50 truncate">{client.name}</h3>
+                  {client.companyName && (
+                    <p className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1">
+                      <Briefcase className="w-3.5 h-3.5" />
+                      {client.companyName} {client.tradingName && <span className="text-zinc-400 font-medium">(T/A {client.tradingName})</span>}
+                    </p>
+                  )}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
                     <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-zinc-500">
                       <CreditCard className="w-3.5 h-3.5 shrink-0" />

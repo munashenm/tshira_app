@@ -127,6 +127,35 @@ export default function CreateClientModal({ provinces }: { provinces: string[] }
                     </select>
                   </div>
                 </div>
+                
+                <div className="md:col-span-2 my-2">
+                  <div className="h-px w-full bg-zinc-200 dark:bg-zinc-800" />
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Business Details</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Business Name</label>
+                  <div className="relative">
+                    <Home className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                    <input name="companyName" placeholder="e.g. Tshira Trading" className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Registration Number</label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                    <input name="ckNumber" placeholder="e.g. 2020/123456/07" className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Trading Name</label>
+                  <div className="relative">
+                    <Home className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                    <input name="tradingName" placeholder="e.g. Tshira" className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                  </div>
+                </div>
 
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Physical Address</label>
