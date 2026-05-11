@@ -53,6 +53,23 @@ export default function ExpensesPage() {
     }
   };
 
+  const updateExpenseStatus = async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/expenses/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetchExpenses();
+      } else {
+        alert("Failed to update status. Only admins can approve expenses.");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
   const pendingCount = expenses.filter(e => e.status === "PENDING").length;
 
@@ -170,13 +187,33 @@ export default function ExpensesPage() {
                   <p className="text-sm font-black text-zinc-900 dark:text-zinc-50">R {e.amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</p>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border ${
-                    e.status === "APPROVED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                    e.status === "REJECTED" ? "bg-red-50 text-red-600 border-red-100" :
-                    "bg-amber-50 text-amber-600 border-amber-100"
-                  }`}>
-                    {e.status}
-                  </span>
+                  <div className="flex items-center justify-end gap-2">
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border ${
+                      e.status === "APPROVED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                      e.status === "REJECTED" ? "bg-red-50 text-red-600 border-red-100" :
+                      "bg-amber-50 text-amber-600 border-amber-100"
+                    }`}>
+                      {e.status}
+                    </span>
+                    {currentPersona?.role === 'ADMIN_OFFICER' && e.status === 'PENDING' && (
+                      <div className="flex items-center gap-1 ml-2">
+                        <button 
+                          onClick={() => updateExpenseStatus(e.id, 'APPROVED')}
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                          title="Approve"
+                        >
+                          <CheckCircle2 className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => updateExpenseStatus(e.id, 'REJECTED')}
+                          className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Decline"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

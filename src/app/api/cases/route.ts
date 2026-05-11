@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const auth = await requireActor(request);
     if (!auth.ok) return auth.response;
 
-    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.PROVINCIAL_COORDINATOR]);
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER]);
     if (roleError) return roleError;
 
     const formData = await request.formData();

@@ -14,12 +14,17 @@ import Link from "next/link";
 import { Province } from "@prisma/client";
 import CreateClientModal from "@/components/CreateClientModal";
 
+import { getSessionActorFromCookies } from "@/lib/session";
+import { Role } from "@prisma/client";
+
 export default async function ClientsPage({
   searchParams,
 }: {
   searchParams: { q?: string };
 }) {
   const query = searchParams.q || "";
+  const actor = await getSessionActorFromCookies();
+  const isAdmin = actor?.role === Role.ADMIN_OFFICER;
   
   const clients = await prisma.client.findMany({
     where: query ? {
@@ -45,7 +50,7 @@ export default async function ClientsPage({
           <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 mt-2">Centralized record of all clients and their project history.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <CreateClientModal provinces={Object.values(Province)} />
+          {isAdmin && <CreateClientModal provinces={Object.values(Province)} />}
         </div>
       </div>
 
