@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation";
 
 export default function ReviewModal({ 
   caseId, 
-  currentStatus 
+  currentStatus,
+  currentUserRole
 }: { 
   caseId: string; 
   currentStatus: CaseStatus;
+  currentUserRole?: string | null;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [comments, setComments] = useState("");
@@ -18,38 +20,60 @@ export default function ReviewModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const isProvincial = currentStatus === "PROVINCIAL_QUALITY_CHECK";
+  const isCoordinatorReview = currentStatus === "DATA_SUBMITTED" || currentStatus === "PROVINCIAL_QUALITY_CHECK";
+  const isConsultantReview = currentStatus === "ASSIGNED_TO_CONSULTANT" || currentStatus === "SUBMITTED_TO_HEAD_OFFICE";
+  const isReviewerReview = currentStatus === "SUBMITTED_FOR_REVIEW";
   
-  const provincialChecklist = [
+  const coordinatorChecklist = [
     "Beneficiary identity verified",
-    "All data collection forms uploaded",
+    "All data collection forms completed",
     "Fieldwork photos/proof attached",
     "Data accuracy cross-checked"
   ];
 
   const consultantChecklist = [
+    "Data provided is sufficient for drafting",
+    "Beneficiary information is clear and legible",
+    "Supporting evidence is relevant",
+    "Ready to commence document drafting"
+  ];
+
+  const reviewerChecklist = [
     "NYDA document template followed",
-    "Financial projections included",
+    "Financial projections included and accurate",
     "Compliance checklist completed",
     "Quality of content verified"
   ];
 
-  const activeChecklist = isProvincial ? provincialChecklist : consultantChecklist;
+  let activeChecklist: string[] = [];
+  let reviewTitle = "";
+  if (isCoordinatorReview) {
+    activeChecklist = coordinatorChecklist;
+    reviewTitle = "Coordinator Quality Check";
+  } else if (isConsultantReview) {
+    activeChecklist = consultantChecklist;
+    reviewTitle = "Consultant Data Assessment";
+  } else if (isReviewerReview) {
+    activeChecklist = reviewerChecklist;
+    reviewTitle = "Internal Document Review";
+  }
 
   const toggleCheck = (item: string) => {
     setChecklist(prev => ({ ...prev, [item]: !prev[item] }));
   };
 
-  const allChecked = activeChecklist.every(item => checklist[item]);
+  const allChecked = activeChecklist.length > 0 && activeChecklist.every(item => checklist[item]);
 
   const handleReview = async (isApproved: boolean) => {
     setIsSubmitting(true);
     
     let nextStatus: CaseStatus = currentStatus;
     
-    if (currentStatus === "PROVINCIAL_QUALITY_CHECK") {
+    if (isCoordinatorReview) {
       nextStatus = isApproved ? "SUBMITTED_TO_HEAD_OFFICE" : "RETURNED_FOR_DATA_CORRECTION";
-    } else if (currentStatus === "SUBMITTED_FOR_REVIEW") {
+    } else if (isConsultantReview) {
+      nextStatus = isApproved ? "DOCUMENT_IN_PROGRESS" : "RETURNED_FOR_DATA_CORRECTION";
+    } else if (isReviewerReview) {
       nextStatus = isApproved ? "INTERNALLY_REVIEWED" : "RETURNED_TO_CONSULTANT";
     }
 
@@ -70,9 +94,19 @@ export default function ReviewModal({
     }
   };
 
-  const isReviewStage = currentStatus === "PROVINCIAL_QUALITY_CHECK" || currentStatus === "SUBMITTED_FOR_REVIEW";
+  const isReviewStage = isCoordinatorReview || isConsultantReview || isReviewerReview;
 
   if (!isReviewStage) return null;
+
+  // Authorization check
+  const isAdmin = currentUserRole === "ADMIN_OFFICER";
+  let isAuthorized = false;
+  if (isAdmin) isAuthorized = true;
+  else if (isCoordinatorReview && currentUserRole === "PROVINCIAL_COORDINATOR") isAuthorized = true;
+  else if (isConsultantReview && currentUserRole === "BUSINESS_CONSULTANT") isAuthorized = true;
+  else if (isReviewerReview && currentUserRole === "REVIEWER") isAuthorized = true;
+
+  if (!isAuthorized) return null;
 
   if (!isOpen) {
     return (
@@ -81,7 +115,7 @@ export default function ReviewModal({
         className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
       >
         <CheckCircle2 className="w-4 h-4" />
-        Perform Quality Check
+        Perform Review
       </button>
     );
   }
@@ -93,7 +127,7 @@ export default function ReviewModal({
           <div>
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Quality Assurance Review</h2>
             <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">
-              {isProvincial ? "Provincial Quality Check" : "Internal Document Review"}
+              {reviewTitle}
             </p>
           </div>
           <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
