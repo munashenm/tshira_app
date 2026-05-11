@@ -112,7 +112,7 @@ export default async function CaseDetailPage({
         <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
           <GenerateDraftButton caseId={c.id} />
           <PrintButton />
-          <ReviewModal caseId={c.id} currentStatus={c.status} />
+          <ReviewModal caseId={c.id} currentStatus={c.status} currentUserRole={actor?.role} />
           <StatusUpdateModal caseId={c.id} currentStatus={c.status} province={c.province} />
         </div>
       </div>
