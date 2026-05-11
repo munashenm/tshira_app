@@ -29,6 +29,13 @@ export async function sendNotification(payload: NotificationPayload) {
   const emailFrom = settings?.emailFrom || "noreply@tshira.co.za";
   const twilioNumber = settings?.whatsappNumber || process.env.TWILIO_WHATSAPP_NUMBER || "";
   
+  const resendKey = settings?.resendApiKey || process.env.RESEND_API_KEY;
+  const twilioSid = settings?.twilioAccountSid || process.env.TWILIO_ACCOUNT_SID;
+  const twilioAuth = settings?.twilioAuthToken || process.env.TWILIO_AUTH_TOKEN;
+
+  const resend = resendKey ? new Resend(resendKey) : null;
+  const twilioClient = twilioSid && twilioAuth ? twilio(twilioSid, twilioAuth) : null;
+
   // 1. Email Channel
   if ((type === "EMAIL" || type === "BOTH") && (settings?.emailEnabled ?? true)) {
     console.log(`[EMAIL DISPATCH] Executing SendGrid/Resend API Call to ${to}`);
@@ -45,19 +52,15 @@ export async function sendNotification(payload: NotificationPayload) {
         console.error(` -> Failed to send email via Resend:`, error);
       }
     } else {
-      console.log(` -> [MOCK] Email would be sent here (Missing RESEND_API_KEY)`);
+      console.log(` -> [MOCK] Email would be sent here (Missing RESEND_API_KEY in settings or .env)`);
     }
   }
 
   // 2. WhatsApp Channel
   if ((type === "WHATSAPP" || type === "BOTH") && (settings?.whatsappEnabled ?? true)) { 
-    // In a production system, map 'to' (which is an email) to their actual phone number.
-    // For demo purposes, we will use a fallback logic or assume 'to' might contain a number.
     console.log(`[WHATSAPP DISPATCH] Executing Twilio WhatsApp API Call to mapped number`);
     if (twilioClient && twilioNumber) {
       try {
-        // Warning: This requires a valid E.164 phone number. 
-        // We will log it if it fails.
         const userPhone = process.env.TEST_WHATSAPP_NUMBER || "+27820000000"; // fallback for demo
         await twilioClient.messages.create({
           body: `📢 Tshira Alert [${caseRef}]:\n\n${message}`,
@@ -69,7 +72,7 @@ export async function sendNotification(payload: NotificationPayload) {
         console.error(` -> Failed to send WhatsApp message via Twilio:`, error);
       }
     } else {
-      console.log(` -> [MOCK] WhatsApp message would be sent here (Missing TWILIO credentials or Sender Number)`);
+      console.log(` -> [MOCK] WhatsApp message would be sent here (Missing TWILIO credentials in settings or .env)`);
     }
   }
 

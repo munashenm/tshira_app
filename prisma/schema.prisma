@@ -284,7 +284,10 @@ model SystemSettings {
   // Notifications
   emailEnabled        Boolean  @default(true)
   emailFrom           String   @default("noreply@tshira.co.za")
+  resendApiKey        String?
   whatsappEnabled     Boolean  @default(false)
   whatsappNumber      String   @default("")
+  twilioAccountSid    String?
+  twilioAuthToken     String?
   updatedAt           DateTime @updatedAt
 }
