@@ -38,8 +38,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const menuItems = [
     { icon: <LayoutDashboard />, label: "Dashboard", href: "/" },
-    { icon: <Briefcase />, label: "Work Items", href: "/cases" },
-    { icon: <ClipboardList />, label: "Work Allocation", href: "/allocations" },
+    { icon: <Briefcase />, label: "Workflow Tasks", href: "/cases" },
     { icon: <Users />, label: "Clients", href: "/clients" },
     { icon: <CalendarDays />, label: "Requisitions", href: "/requisitions" },
     { icon: <Receipt />, label: "Finance", href: "/finance" },

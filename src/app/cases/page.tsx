@@ -111,7 +111,7 @@ export default function CasesPage() {
     <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Work Items</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Workflow Tasks</h1>
           <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 mt-2">Manage and track {cases.length} NYDA projects across South Africa.</p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
