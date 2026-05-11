@@ -1,9 +1,16 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { Province } from "@prisma/client";
+import { Province, Role } from "@prisma/client";
+import { requireActor, requireRoles } from "@/lib/authz";
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER]);
+    if (roleError) return roleError;
+
     const body = await request.json();
     const { name, idNumber, phone, address, province, email, companyName, ckNumber, tradingName } = body;
 

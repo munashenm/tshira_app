@@ -17,10 +17,11 @@ import {
   CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
-import { CaseStatus, Province, User } from "@prisma/client";
+import { CaseStatus, Province, User, Role } from "@prisma/client";
 import BulkAssignmentModal from "@/components/BulkAssignmentModal";
 import CreateCaseForm from "@/components/CreateCaseForm";
 import { getClientActor } from "@/lib/client-auth";
+import { useSimulation } from "@/lib/SimulationContext";
 
 type CaseWithRelations = any; // We'll fetch client-side for interactivity
 
@@ -32,6 +33,9 @@ export default function CasesPage() {
   const [provinceFilter, setProvinceFilter] = useState<Province | "ALL">("ALL");
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const { currentPersona } = useSimulation();
+  
+  const isAdmin = currentPersona?.role === Role.ADMIN_OFFICER;
 
   useEffect(() => {
     fetchCases();
@@ -115,15 +119,19 @@ export default function CasesPage() {
           <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 mt-2">Manage and track {cases.length} NYDA projects across South Africa.</p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-          <CreateCaseForm provinces={Object.values(Province)} />
-          <button 
-            onClick={simulateImport}
-            disabled={isImporting}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
-          >
-            {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
-            {isImporting ? "Importing..." : "Import Batch"}
-          </button>
+          {isAdmin && (
+            <>
+              <CreateCaseForm provinces={Object.values(Province)} />
+              <button 
+                onClick={simulateImport}
+                disabled={isImporting}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+              >
+                {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+                {isImporting ? "Importing..." : "Import Batch"}
+              </button>
+            </>
+          )}
           <a href="/api/export/cases" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">
             <Download className="w-4 h-4" /> Export
           </a>
