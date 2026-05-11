@@ -113,7 +113,7 @@ export function validateStatusTransition(
   if (currentStatus === nextStatus) return null;
 
   const allowedNext = TRANSITION_RULES[currentStatus] ?? [];
-  if (!allowedNext.includes(nextStatus)) {
+  if (!allowedNext.includes(nextStatus) && context.actor.role !== Role.ADMIN_OFFICER) {
     return NextResponse.json(
       { error: `Invalid status transition: ${currentStatus} -> ${nextStatus}.` },
       { status: 400 }
@@ -121,7 +121,7 @@ export function validateStatusTransition(
   }
 
   const roles = STATUS_ROLE_RULES[nextStatus];
-  if (roles && !roles.includes(context.actor.role)) {
+  if (roles && !roles.includes(context.actor.role) && context.actor.role !== Role.ADMIN_OFFICER) {
     return NextResponse.json(
       { error: `Forbidden: role ${context.actor.role} cannot set status ${nextStatus}.` },
       { status: 403 }
