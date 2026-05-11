@@ -12,7 +12,7 @@ interface NotificationPayload {
   to: string;
   name: string;
   type: "EMAIL" | "WHATSAPP" | "BOTH";
-  caseRef: string;
+  caseRef?: string;
   message: string;
 }
 
@@ -41,10 +41,11 @@ export async function sendNotification(payload: NotificationPayload) {
     console.log(`[EMAIL DISPATCH] Executing SendGrid/Resend API Call to ${to}`);
     if (resend) {
       try {
+        const subject = caseRef ? `Update on NYDA Project: ${caseRef}` : `Tshira Management Systems Notification`;
         await resend.emails.send({
           from: emailFrom,
           to: to,
-          subject: `Update on NYDA Project: ${caseRef}`,
+          subject: subject,
           html: `<p>Dear ${name},</p><p>${message}</p><p>Regards,<br>Tshira Management Systems</p>`,
         });
         console.log(` -> Email successfully dispatched via Resend.`);
@@ -94,4 +95,10 @@ export const notificationTemplates = {
   
   paymentReceived: (ref: string) => 
     `Payment has been confirmed for project ${ref}. Thank you!`,
+
+  clientRegistered: (clientName: string) =>
+    `Welcome to Tshira Management Systems! We have successfully registered your details (${clientName}) in our database.`,
+  
+  teamMemberAdded: (role: string, pass: string) =>
+    `Welcome to the team! You have been added to the Tshira Workflow Management System as a ${role.replace(/_/g, ' ')}. Your temporary password is: ${pass}. Please log in and change your password immediately.`,
 };

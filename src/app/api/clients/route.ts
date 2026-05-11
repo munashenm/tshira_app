@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Province, Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
+import { sendNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -31,6 +32,15 @@ export async function POST(request: Request) {
         tradingName,
       },
     });
+
+    if (email) {
+      await sendNotification({
+        to: email,
+        name: name,
+        type: "EMAIL",
+        message: notificationTemplates.clientRegistered(name)
+      });
+    }
 
     return NextResponse.json(client);
   } catch (error: any) {

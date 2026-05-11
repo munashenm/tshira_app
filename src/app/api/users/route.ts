@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
+import { sendNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function GET(request: Request) {
   const auth = await requireActor(request);
@@ -54,6 +55,15 @@ export async function POST(request: Request) {
         municipality,
       },
     });
+
+    if (email) {
+      await sendNotification({
+        to: email,
+        name: name || "Team Member",
+        type: "EMAIL",
+        message: notificationTemplates.teamMemberAdded(role, password || "configured securely")
+      });
+    }
 
     return NextResponse.json(user);
   } catch (error) {
