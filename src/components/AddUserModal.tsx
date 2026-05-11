@@ -13,7 +13,10 @@ export default function AddUserModal() {
     email: "",
     password: "password123", // Default for demo
     role: Role.DATA_COLLECTION_OFFICER as Role,
-    province: "" as Province | ""
+    province: "" as Province | "",
+    phone: "",
+    district: "",
+    municipality: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -39,7 +42,10 @@ export default function AddUserModal() {
             email: "",
             password: "password123",
             role: Role.DATA_COLLECTION_OFFICER as Role,
-            province: "" as Province | ""
+            province: "" as Province | "",
+            phone: "",
+            district: "",
+            municipality: ""
         });
         router.refresh();
       } else {
@@ -108,6 +114,20 @@ export default function AddUserModal() {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Phone Number</label>
+            <div className="relative">
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input 
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                placeholder="+27 82 123 4567"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">System Role</label>
@@ -146,6 +166,32 @@ export default function AddUserModal() {
                     <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
                   ))}
                 </select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">District</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input 
+                  value={formData.district}
+                  onChange={(e) => setFormData({...formData, district: e.target.value})}
+                  placeholder="e.g. Capricorn"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Local Municipality</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input 
+                  value={formData.municipality}
+                  onChange={(e) => setFormData({...formData, municipality: e.target.value})}
+                  placeholder="e.g. Polokwane"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
             </div>
           </div>
