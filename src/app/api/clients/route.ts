@@ -5,7 +5,7 @@ import { Province } from "@prisma/client";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, idNumber, phone, address, province, email } = body;
+    const { name, idNumber, phone, address, province, email, companyName, ckNumber, tradingName } = body;
 
     if (!name || !idNumber || !province) {
       return NextResponse.json({ error: "Name, ID Number and Province are required" }, { status: 400 });
@@ -19,6 +19,9 @@ export async function POST(request: Request) {
         address,
         province: province as Province,
         email,
+        companyName,
+        ckNumber,
+        tradingName,
       },
     });
 
