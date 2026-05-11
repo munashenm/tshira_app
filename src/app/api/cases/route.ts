@@ -3,9 +3,20 @@ import { NextResponse } from "next/server";
 import { Province, Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const whereClause: any = {};
+    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province) {
+      whereClause.province = auth.context.actor.province;
+    } else if (auth.context.actor.role === Role.DATA_COLLECTION_OFFICER && auth.context.actor.province) {
+      whereClause.province = auth.context.actor.province;
+    }
+
     const cases = await prisma.case.findMany({
+      where: whereClause,
       include: {
         client: true,
         coordinator: { select: { id: true, name: true, email: true } },

@@ -7,7 +7,15 @@ export async function GET(request: Request) {
   const auth = await requireActor(request);
   if (!auth.ok) return auth.response;
 
+  const whereClause: any = {};
+  if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province) {
+    whereClause.province = auth.context.actor.province;
+  } else if (auth.context.actor.role === Role.DATA_COLLECTION_OFFICER && auth.context.actor.province) {
+    whereClause.province = auth.context.actor.province;
+  }
+
   const requisitions = await prisma.requisition.findMany({
+    where: whereClause,
     include: { user: true },
     orderBy: { createdAt: 'desc' }
   });
