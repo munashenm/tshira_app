@@ -11,6 +11,9 @@ export default function EditUserModal({ user }: { user: any }) {
   const [tab, setTab] = useState<"permissions" | "password">("permissions");
   const [role, setRole] = useState<Role>(user.role);
   const [province, setProvince] = useState<Province | "">(user.province || "");
+  const [phone, setPhone] = useState(user.phone || "");
+  const [district, setDistrict] = useState(user.district || "");
+  const [municipality, setMunicipality] = useState(user.municipality || "");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -25,7 +28,7 @@ export default function EditUserModal({ user }: { user: any }) {
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, province: province || null, userId: actor?.id }),
+        body: JSON.stringify({ role, province: province || null, phone, district, municipality, userId: actor?.id }),
       });
       if (res.ok) {
         setIsOpen(false);
@@ -136,6 +139,42 @@ export default function EditUserModal({ user }: { user: any }) {
                   <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="w-3 h-3" /> Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+27 82 123 4567"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="w-3 h-3" /> District
+              </label>
+              <input
+                type="text"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                placeholder="District"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="w-3 h-3" /> Local Municipality
+              </label>
+              <input
+                type="text"
+                value={municipality}
+                onChange={(e) => setMunicipality(e.target.value)}
+                placeholder="Municipality"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
             </div>
             <button
               type="submit"

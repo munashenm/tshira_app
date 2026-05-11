@@ -40,15 +40,18 @@ export async function POST(request: Request) {
     if (roleError) return roleError;
 
     const body = await request.json();
-    const { name, email, password, role, province } = body;
+    const { name, email, phone, password, role, province, district, municipality } = body;
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
+        phone,
         password,
         role,
         province,
+        district,
+        municipality,
       },
     });
 
