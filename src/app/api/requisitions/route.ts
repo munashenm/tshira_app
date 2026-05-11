@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const roleError = requireRoles(auth.context, [Role.PROVINCIAL_COORDINATOR, Role.DATA_COLLECTION_OFFICER]);
     if (roleError) return roleError;
 
-    const { province, location, dateTime, purpose, isClientVisit, estimatedCost } = body;
+    const { province, location, dateTime, purpose, isClientVisit, estimatedCost, clientId } = body;
 
     if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province && auth.context.actor.province !== province) {
       return NextResponse.json({ error: "Forbidden: coordinator can only create requisitions in their province." }, { status: 403 });
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         purpose,
         isClientVisit,
         estimatedCost,
+        clientId: isClientVisit && clientId ? clientId : null,
         userId: auth.context.actor.id,
         status: RequisitionStatus.SUBMITTED
       }
