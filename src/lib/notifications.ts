@@ -36,6 +36,24 @@ export async function sendNotification(payload: NotificationPayload) {
   const resend = resendKey ? new Resend(resendKey) : null;
   const twilioClient = twilioSid && twilioAuth ? twilio(twilioSid, twilioAuth) : null;
 
+  // 0. Save to Database for UI Bell icon
+  try {
+    // Attempt to map 'to' (email) or 'name' to a user ID to link the notification.
+    const user = await prisma.user.findFirst({ where: { OR: [{ email: to }, { name: name }] } });
+    const caseRec = caseRef ? await prisma.case.findFirst({ where: { id: caseRef } }) : null;
+    
+    await prisma.notification.create({
+      data: {
+        userId: user?.id,
+        caseId: caseRec?.id,
+        type: type,
+        message: message
+      }
+    });
+  } catch (err) {
+    console.error("Failed to save DB notification:", err);
+  }
+
   // 1. Email Channel
   if ((type === "EMAIL" || type === "BOTH") && (settings?.emailEnabled ?? true)) {
     console.log(`[EMAIL DISPATCH] Executing SendGrid/Resend API Call to ${to}`);
