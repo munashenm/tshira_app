@@ -20,8 +20,8 @@ export default async function RequisitionsPage() {
   });
 
   return (
-    <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
-      <div className="flex justify-between items-end">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Space Requisitions</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage co-working space bookings for data collection teams.</p>
@@ -29,7 +29,7 @@ export default async function RequisitionsPage() {
         <CreateRequisitionModal />
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-x-auto no-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50">

@@ -49,23 +49,24 @@ export default function TopNav({ onMenuClick }: TopNavProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 lg:gap-4">
+      <div className="flex items-center gap-4 lg:gap-6">
         {/* Notification Bell */}
         <NotificationCenter />
 
         {/* User Profile / Persona Switcher */}
-        <div className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-4 border-l border-zinc-100 dark:border-zinc-800 relative">
+        <div className="flex items-center gap-3 lg:gap-4 pl-3 lg:pl-6 border-l border-zinc-100 dark:border-zinc-800 relative">
           <button 
             onClick={() => setShowPersonaSwitcher(!showPersonaSwitcher)}
-            className="text-right hidden sm:block hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 rounded-xl transition-all"
+            className="flex items-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1 sm:p-2 rounded-xl transition-all"
           >
-            <div className="flex items-center gap-2">
-              <div className="hidden lg:block">
-                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{currentPersona?.name || "Loading..."}</p>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{currentPersona?.role?.replace(/_/g, ' ')}</p>
-              </div>
-              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${showPersonaSwitcher ? 'rotate-180' : ''}`} />
+            <div className="text-right hidden lg:block">
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{currentPersona?.name || "Loading..."}</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{currentPersona?.role?.replace(/_/g, ' ')}</p>
             </div>
+            <div className="w-8 h-8 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-sm shrink-0">
+              {currentPersona?.name?.charAt(0) || "?"}
+            </div>
+            <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform hidden sm:block ${showPersonaSwitcher ? 'rotate-180' : ''}`} />
           </button>
 
           {showPersonaSwitcher && (
@@ -103,9 +104,6 @@ export default function TopNav({ onMenuClick }: TopNavProps) {
               </div>
             </div>
           )}
-          <div className="w-8 h-8 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-sm shrink-0">
-            {currentPersona?.name?.charAt(0) || "?"}
-          </div>
           <button
             onClick={handleSignOut}
             title="Sign Out"

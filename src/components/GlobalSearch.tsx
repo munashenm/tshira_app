@@ -68,8 +68,8 @@ export default function GlobalSearch() {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => results && setIsOpen(true)}
-          placeholder="Search cases, clients, references..."
-          className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl pl-10 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-zinc-400"
+          placeholder="Search..."
+          className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl pl-10 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-zinc-400 truncate"
         />
         {isLoading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 animate-spin" />

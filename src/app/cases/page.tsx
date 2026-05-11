@@ -224,13 +224,13 @@ export default function CasesPage() {
             
             <Link href={`/cases/${c.id}`} className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4 sm:gap-6">
-                <div className={`hidden xs:flex w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-[22px] items-center justify-center transition-colors shrink-0 ${
+                <div className={`hidden sm:flex w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-[22px] items-center justify-center transition-colors shrink-0 ${
                   selectedIds.includes(c.id) ? "bg-blue-600 text-white" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700"
                 }`}>
                   <Briefcase className="w-6 h-6 sm:w-7 sm:h-7" />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex flex-col xs:flex-row xs:items-center gap-1 sm:gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                     <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-50 truncate">{c.clientName}</h3>
                     <span className="w-fit text-[9px] font-black tracking-widest uppercase text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
                       {c.nydaReference || "NO REF"}
