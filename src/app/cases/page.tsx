@@ -41,29 +41,45 @@ export default function CasesPage() {
     fetchCases();
   }, []);
 
-  const simulateImport = async () => {
-    if (!confirm("Simulate importing 5 new cases from NYDA?")) return;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsImporting(true);
     try {
-      const actor = getClientActor();
-      const mockCases = [
-        { clientName: "Johannes Steyn", province: "MPUMALANGA", outputType: "Business Plan", nydaReference: "NYDA-2026-881" },
-        { clientName: "Thabo Mbeki Ent", province: "GAUTENG", outputType: "Feasibility Study", nydaReference: "NYDA-2026-902" },
-        { clientName: "Nomusa Dlamini", province: "LIMPOPO", outputType: "Business Plan", nydaReference: "NYDA-2026-443" },
-        { clientName: "Pretoria Tech Hub", province: "GAUTENG", outputType: "Marketing Strategy", nydaReference: "NYDA-2026-112" },
-        { clientName: "Kruger Safaris", province: "MPUMALANGA", outputType: "Business Plan", nydaReference: "NYDA-2026-765" },
-      ];
+      const text = await file.text();
+      // Basic CSV Parser: NYDA Reference, Client Name, Province, Output Type
+      const lines = text.split('\n').filter(line => line.trim().length > 0);
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const cases = lines.slice(1).map(line => {
+        const values = line.split(',');
+        return {
+          nydaReference: values[0]?.trim(),
+          clientName: values[1]?.trim(),
+          province: values[2]?.trim().toUpperCase(),
+          outputType: values[3]?.trim()
+        };
+      });
 
       const res = await fetch("/api/cases/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cases: mockCases, userId: actor?.id }),
+        body: JSON.stringify({ cases }),
       });
+
       if (res.ok) {
+        alert(`Successfully imported ${cases.length} cases!`);
         await fetchCases();
+      } else {
+        alert("Failed to import cases. Ensure the CSV matches: Reference,Client Name,Province,Output Type");
       }
+    } catch (err) {
+      console.error(err);
+      alert("Error parsing CSV");
     } finally {
       setIsImporting(false);
+      e.target.value = ''; // Reset input
     }
   };
 
@@ -123,13 +139,20 @@ export default function CasesPage() {
             <>
               <CreateCaseForm provinces={Object.values(Province)} />
               <button 
-                onClick={simulateImport}
+                onClick={() => document.getElementById("csv-upload")?.click()}
                 disabled={isImporting}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
               >
                 {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
                 {isImporting ? "Importing..." : "Import Batch"}
               </button>
+              <input 
+                id="csv-upload" 
+                type="file" 
+                accept=".csv" 
+                className="hidden" 
+                onChange={handleFileUpload} 
+              />
             </>
           )}
           <a href="/api/export/cases" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">

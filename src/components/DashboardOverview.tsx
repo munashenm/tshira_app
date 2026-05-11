@@ -1,5 +1,7 @@
 "use client";
 
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from "recharts";
+
 import React, { useState, useEffect } from "react";
 import { 
   Users, 
@@ -212,23 +214,44 @@ export default function DashboardOverview() {
             <div className="bg-white dark:bg-zinc-900 rounded-[32px] sm:rounded-[40px] p-5 sm:p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <h3 className="text-lg sm:text-xl font-black mb-6 sm:mb-8 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-zinc-400" />
-                Regional Volume
+                Regional Volume & Status
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 sm:gap-y-6">
-                  {data.provinceStats.map(ps => {
-                    const pct = Math.round((ps._count.id / data.totalCases) * 100);
-                    return (
-                      <div key={ps.province} className="space-y-1.5">
-                        <div className="flex justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                          <span>{ps.province.replace('_', ' ')}</span>
-                          <span>{ps._count.id}</span>
-                        </div>
-                        <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Bar Chart for Provinces */}
+                <div className="h-64">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center mb-4">Volume by Province</p>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.provinceStats.map(p => ({ name: p.province.replace(/_/g, ' '), count: p._count.id }))}>
+                      <XAxis dataKey="name" tick={{fontSize: 10, fill: '#888'}} tickLine={false} axisLine={false} />
+                      <RechartsTooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)'}} />
+                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Pie Chart for Statuses */}
+                <div className="h-64">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center mb-4">Active Status Distribution</p>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={Object.entries(data.statusCounts).map(([key, val]) => ({ name: key.replace(/_/g, ' '), value: val }))}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {Object.keys(data.statusCounts).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'][index % 5]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)'}} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           )}
