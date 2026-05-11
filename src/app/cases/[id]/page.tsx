@@ -62,7 +62,7 @@ export default async function CaseDetailPage({
     <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen pb-24">
       <Link href="/cases" className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors text-sm">
         <ArrowLeft className="w-4 h-4" />
-        Back to Work Items
+        Back to Workflow Tasks
       </Link>
 
       <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
