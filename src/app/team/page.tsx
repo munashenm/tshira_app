@@ -19,6 +19,13 @@ import AddUserModal from "@/components/AddUserModal";
 export default async function TeamPage() {
   const users = await prisma.user.findMany({
     orderBy: { role: 'asc' },
+    include: {
+      history: {
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: { case: { select: { clientName: true, nydaReference: true } } }
+      }
+    }
   });
 
   const roles = Object.values(Role);
