@@ -17,8 +17,8 @@ interface Settings {
   invoiceAccountType: string; invoiceVatNumber: string;
   invoiceTerms: string; invoiceNotes: string;
   slaDefaultDays: number; autoSlaAlerts: boolean;
-  emailEnabled: boolean; emailFrom: string;
-  whatsappEnabled: boolean; whatsappNumber: string;
+  emailEnabled: boolean; emailFrom: string; resendApiKey: string;
+  whatsappEnabled: boolean; whatsappNumber: string; twilioAccountSid: string; twilioAuthToken: string;
 }
 
 const DEFAULT: Settings = {
@@ -30,8 +30,8 @@ const DEFAULT: Settings = {
   invoiceTerms: "Payment is due within 30 days of invoice date. Late payments may incur interest charges.",
   invoiceNotes: "Thank you for your business.",
   slaDefaultDays: 7, autoSlaAlerts: true,
-  emailEnabled: true, emailFrom: "noreply@tshira.co.za",
-  whatsappEnabled: false, whatsappNumber: "",
+  emailEnabled: true, emailFrom: "noreply@tshira.co.za", resendApiKey: "",
+  whatsappEnabled: false, whatsappNumber: "", twilioAccountSid: "", twilioAuthToken: "",
 };
 
 export default function SettingsPage() {
@@ -308,9 +308,22 @@ export default function SettingsPage() {
               <h3 className="text-lg font-bold">Notification Channels</h3>
               <div className="space-y-5">
                 <Toggle icon={<Mail />} label="Email Notifications" desc="Notify team members about new assignments and status changes." value={settings.emailEnabled} onChange={v => set("emailEnabled", v)} />
-                {settings.emailEnabled && <div className="ml-14"><Field label="From Email" type="email" value={settings.emailFrom} onChange={v => set("emailFrom", v)} /></div>}
+                {settings.emailEnabled && (
+                  <div className="ml-14 grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <Field label="From Email" type="email" value={settings.emailFrom} onChange={v => set("emailFrom", v)} />
+                    <Field label="Resend API Key" type="password" value={settings.resendApiKey || ""} onChange={v => set("resendApiKey", v)} placeholder="re_..." />
+                  </div>
+                )}
                 <Toggle icon={<Smartphone />} label="WhatsApp Integration" desc="Send automated status updates via WhatsApp Business API." value={settings.whatsappEnabled} onChange={v => set("whatsappEnabled", v)} />
-                {settings.whatsappEnabled && <div className="ml-14"><Field label="WhatsApp Business Number" value={settings.whatsappNumber} onChange={v => set("whatsappNumber", v)} placeholder="+27 82 000 0000" /></div>}
+                {settings.whatsappEnabled && (
+                  <div className="ml-14 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <Field label="Twilio Account SID" value={settings.twilioAccountSid || ""} onChange={v => set("twilioAccountSid", v)} placeholder="AC..." />
+                      <Field label="Twilio Auth Token" type="password" value={settings.twilioAuthToken || ""} onChange={v => set("twilioAuthToken", v)} placeholder="••••••••" />
+                    </div>
+                    <Field label="WhatsApp Business Number" value={settings.whatsappNumber} onChange={v => set("whatsappNumber", v)} placeholder="+14155238886" />
+                  </div>
+                )}
               </div>
             </div>
           )}
