@@ -16,7 +16,12 @@ import RequisitionActions from "@/components/RequisitionActions";
 export default async function RequisitionsPage() {
   const requisitions = await prisma.requisition.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { user: true }
+    include: { user: true, client: true }
+  });
+
+  const clients = await prisma.client.findMany({
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true, companyName: true }
   });
 
   return (
@@ -26,7 +31,7 @@ export default async function RequisitionsPage() {
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Space Requisitions</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage co-working space bookings for data collection teams.</p>
         </div>
-        <CreateRequisitionModal />
+        <CreateRequisitionModal clients={clients} />
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-x-auto no-scrollbar">
@@ -36,8 +41,9 @@ export default async function RequisitionsPage() {
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Province</th>
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Location / Date</th>
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Purpose</th>
-              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Requested By</th>
-              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Client</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Coordinator</th>
+              <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status / Approvals</th>
               <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
@@ -62,15 +68,32 @@ export default async function RequisitionsPage() {
                   <span className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-1">{req.purpose}</span>
                 </td>
                 <td className="px-8 py-6">
+                  {req.client ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{req.client.name}</span>
+                      {req.client.companyName && <span className="text-[10px] text-zinc-500 font-medium">({req.client.companyName})</span>}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-zinc-400 font-medium">-</span>
+                  )}
+                </td>
+                <td className="px-8 py-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600">
                       {req.user.name?.charAt(0)}
                     </div>
                     <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{req.user.name}</span>
                   </div>
                 </td>
                 <td className="px-8 py-6">
-                  <StatusBadge status={req.status} />
+                  <div className="flex flex-col items-start gap-2">
+                    <StatusBadge status={req.status} />
+                    <div className="flex items-center gap-2 text-[10px] font-bold">
+                      <span className={req.approvedById ? "text-green-500" : "text-zinc-400"}>Admin {req.approvedById ? '✓' : 'Pending'}</span>
+                      <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                      <span className={req.financeApprovedById ? "text-green-500" : "text-zinc-400"}>Finance {req.financeApprovedById ? '✓' : 'Pending'}</span>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-8 py-6 text-right">
                   <RequisitionActions id={req.id} status={req.status} />

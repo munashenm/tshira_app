@@ -6,12 +6,11 @@ import { Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { getClientActor } from "@/lib/client-auth";
 
-export default function CreateRequisitionModal() {
+export default function CreateRequisitionModal({ clients }: { clients: { id: string, name: string, companyName: string | null }[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  // Read logged-in user from localStorage
   const [selectedProvince, setSelectedProvince] = useState<string>("LIMPOPO");
 
   const [formData, setFormData] = useState({
@@ -19,6 +18,7 @@ export default function CreateRequisitionModal() {
     dateTime: "",
     purpose: "",
     isClientVisit: false,
+    clientId: "",
     estimatedCost: 0,
   });
 
@@ -145,6 +145,25 @@ export default function CreateRequisitionModal() {
               />
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 transition-colors">This is a client/beneficiary visit</span>
             </label>
+
+            {formData.isClientVisit && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Client to be met</label>
+                <select 
+                  required
+                  value={formData.clientId}
+                  onChange={(e) => setFormData({...formData, clientId: e.target.value})}
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                >
+                  <option value="">Select a client...</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} {c.companyName ? `(${c.companyName})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30 flex gap-3">
               <Info className="w-5 h-5 text-blue-500 shrink-0" />

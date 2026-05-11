@@ -42,12 +42,16 @@ export default function RequisitionActions({
   };
 
   const isAdmin = currentPersona?.role === Role.ADMIN_OFFICER;
+  const isFinance = currentPersona?.role === Role.FINANCE;
 
-  if (isAdmin && status === "SUBMITTED") {
+  const canAdminApprove = isAdmin && status === "SUBMITTED";
+  const canFinanceApprove = isFinance && (status === "SUBMITTED" || status === "APPROVED");
+
+  if (canAdminApprove || canFinanceApprove) {
     return (
       <div className="flex justify-end gap-2">
         <button 
-          onClick={() => handleAction(RequisitionStatus.APPROVED)}
+          onClick={() => handleAction(isFinance ? RequisitionStatus.BOOKED : RequisitionStatus.APPROVED)}
           disabled={isSubmitting}
           className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50" 
           title="Approve"

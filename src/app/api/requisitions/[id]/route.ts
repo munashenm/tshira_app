@@ -37,12 +37,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden: only owner or admin can update this requisition." }, { status: 403 });
     }
 
+    const dataToUpdate: any = { status: nextStatus };
+    if (isApprovalTransition) {
+      if (auth.context.actor.role === Role.FINANCE) {
+        dataToUpdate.financeApprovedById = auth.context.actor.id;
+      } else {
+        dataToUpdate.approvedById = auth.context.actor.id;
+      }
+    }
+
     const requisition = await prisma.requisition.update({
       where: { id },
-      data: {
-        status: nextStatus,
-        approvedById: approvedById || (isApprovalTransition ? auth.context.actor.id : undefined),
-      },
+      data: dataToUpdate,
     });
 
     return NextResponse.json(requisition);
