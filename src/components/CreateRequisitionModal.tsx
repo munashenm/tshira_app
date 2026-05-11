@@ -101,12 +101,12 @@ export default function CreateRequisitionModal() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Date & Time</label>
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Date</label>
                 <div className="relative">
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                   <input 
                     required
-                    type="datetime-local"
+                    type="date"
                     value={formData.dateTime}
                     onChange={(e) => setFormData({...formData, dateTime: e.target.value})}
                     className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
