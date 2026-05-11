@@ -8,18 +8,21 @@ export default function CaseTabs({
   documents, 
   fieldwork, 
   history,
+  allocation,
   showFieldwork = true
 }: { 
   overview: React.ReactNode; 
   documents: React.ReactNode; 
   fieldwork: React.ReactNode; 
   history: React.ReactNode;
+  allocation?: React.ReactNode;
   showFieldwork?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState("overview");
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Info },
+    ...(allocation ? [{ id: "allocation", label: "Work Allocation", icon: ClipboardCheck }] : []),
     { id: "documents", label: "Documents", icon: FileText },
     ...(showFieldwork ? [{ id: "fieldwork", label: "Fieldwork", icon: ClipboardCheck }] : []),
     { id: "history", label: "Audit Log", icon: History },
@@ -52,6 +55,7 @@ export default function CaseTabs({
       {/* Tab Content */}
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         {activeTab === "overview" && overview}
+        {activeTab === "allocation" && allocation}
         {activeTab === "documents" && documents}
         {activeTab === "fieldwork" && fieldwork}
         {activeTab === "history" && history}

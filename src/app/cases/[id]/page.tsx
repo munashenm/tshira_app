@@ -26,6 +26,7 @@ import PrintButton from "@/components/PrintButton";
 import BusinessPlanForm from "@/components/forms/BusinessPlanForm";
 import ClientChecklistForm from "@/components/forms/ClientChecklistForm";
 import ClientRegistrationForm from "@/components/forms/ClientRegistrationForm";
+import WorkAllocationManager from "@/components/forms/WorkAllocationManager";
 
 export default async function CaseDetailPage({
   params,
@@ -126,6 +127,26 @@ export default async function CaseDetailPage({
                 </div>
               </div>
             }
+            allocation={
+              <div className="space-y-8">
+                <WorkAllocationManager 
+                  caseId={c.id}
+                  caseData={c}
+                  clientData={c.client}
+                  formResponses={c.formResponses}
+                />
+                
+                <div className="bg-white dark:bg-zinc-900 rounded-3xl p-5 sm:p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                  <h3 className="text-lg font-bold mb-6">Team Assignment List</h3>
+                  <div className="space-y-6">
+                    <UserRow roleName="Coordinator" role={Role.PROVINCIAL_COORDINATOR} name={c.coordinator?.name} caseId={c.id} province={c.province} />
+                    <UserRow roleName="Field Officer" role={Role.DATA_COLLECTION_OFFICER} name={c.dco?.name} caseId={c.id} province={c.province} />
+                    <UserRow roleName="Consultant" role={Role.BUSINESS_CONSULTANT} name={c.consultant?.name} caseId={c.id} province={c.province} />
+                    <UserRow roleName="Reviewer" role={Role.REVIEWER} name={c.reviewer?.name} caseId={c.id} province={c.province} />
+                  </div>
+                </div>
+              </div>
+            }
             documents={
               <div className="space-y-8">
                 <ClientChecklistForm 
@@ -205,15 +226,6 @@ export default async function CaseDetailPage({
         </div>
 
         <div className="space-y-6 sm:space-y-8">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-5 sm:p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            <h3 className="text-lg font-bold mb-6">Team Allocation</h3>
-            <div className="space-y-6">
-              <UserRow roleName="Coordinator" role={Role.PROVINCIAL_COORDINATOR} name={c.coordinator?.name} caseId={c.id} province={c.province} />
-              <UserRow roleName="Field Officer" role={Role.DATA_COLLECTION_OFFICER} name={c.dco?.name} caseId={c.id} province={c.province} />
-              <UserRow roleName="Consultant" role={Role.BUSINESS_CONSULTANT} name={c.consultant?.name} caseId={c.id} province={c.province} />
-              <UserRow roleName="Reviewer" role={Role.REVIEWER} name={c.reviewer?.name} caseId={c.id} province={c.province} />
-            </div>
-          </div>
 
           <div className="bg-blue-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-500/20">
             <div className="flex items-center gap-3 mb-4">
