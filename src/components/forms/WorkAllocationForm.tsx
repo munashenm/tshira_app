@@ -86,61 +86,61 @@ export default function WorkAllocationForm({ caseId, initialData, clientData, ca
           <FormField 
             label="Name of Admin" 
             value={data.adminName} 
-            onChange={(v) => updateField("adminName", v)} 
+            onChange={(v: string) => updateField("adminName", v)} 
             icon={<User />} 
           />
           <FormField 
             label="Name of the Client" 
             value={data.clientName} 
-            onChange={(v) => updateField("clientName", v)} 
+            onChange={(v: string) => updateField("clientName", v)} 
             icon={<User />} 
           />
           <FormField 
             label="ID Number" 
             value={data.idNumber} 
-            onChange={(v) => updateField("idNumber", v)} 
+            onChange={(v: string) => updateField("idNumber", v)} 
             icon={<Briefcase />} 
           />
           <FormField 
             label="Business Name" 
             value={data.businessName} 
-            onChange={(v) => updateField("businessName", v)} 
+            onChange={(v: string) => updateField("businessName", v)} 
             icon={<Building />} 
           />
           <FormField 
             label="Voucher Number" 
             value={data.voucherNumber} 
-            onChange={(v) => updateField("voucherNumber", v)} 
+            onChange={(v: string) => updateField("voucherNumber", v)} 
             icon={<ClipboardList />} 
           />
           <FormField 
             label="Service Required" 
             value={data.serviceRequired} 
-            onChange={(v) => updateField("serviceRequired", v)} 
+            onChange={(v: string) => updateField("serviceRequired", v)} 
             icon={<Briefcase />} 
           />
           <FormField 
             label="Province" 
             value={data.province} 
-            onChange={(v) => updateField("province", v)} 
+            onChange={(v: string) => updateField("province", v)} 
             icon={<MapPin />} 
           />
           <FormField 
             label="District" 
             value={data.district} 
-            onChange={(v) => updateField("district", v)} 
+            onChange={(v: string) => updateField("district", v)} 
             icon={<MapPin />} 
           />
           <FormField 
             label="Local Municipality" 
             value={data.municipality} 
-            onChange={(v) => updateField("municipality", v)} 
+            onChange={(v: string) => updateField("municipality", v)} 
             icon={<MapPin />} 
           />
           <FormField 
             label="Name of Provincial Coordinator" 
             value={data.coordinatorName} 
-            onChange={(v) => updateField("coordinatorName", v)} 
+            onChange={(v: string) => updateField("coordinatorName", v)} 
             icon={<User />} 
           />
         </div>
