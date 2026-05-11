@@ -155,18 +155,18 @@ export default function BusinessPlanForm({ caseId, initialData, onSave }: Busine
             <div className="flex-1 mt-10 space-y-8">
               {activeSection === "identity" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField label="Name of the business" value={formData.identity?.businessName} onChange={(v) => updateField("identity", "businessName", v)} />
-                  <FormField label="Registration Number" value={formData.identity?.regNumber} onChange={(v) => updateField("identity", "regNumber", v)} />
-                  <FormField label="Tax Number" value={formData.identity?.taxNumber} onChange={(v) => updateField("identity", "taxNumber", v)} />
-                  <FormField label="Voucher No" value={formData.identity?.voucherNo} onChange={(v) => updateField("identity", "voucherNo", v)} />
-                  <FormField label="COIDA Reg Number" value={formData.identity?.coidaNumber} onChange={(v) => updateField("identity", "coidaNumber", v)} />
-                  <FormField label="PAYE Reg Number" value={formData.identity?.payeNumber} onChange={(v) => updateField("identity", "payeNumber", v)} />
-                  <FormField label="UIF Reg Number" value={formData.identity?.uifNumber} onChange={(v) => updateField("identity", "uifNumber", v)} />
-                  <FormField label="Physical Address" value={formData.identity?.address} onChange={(v) => updateField("identity", "address", v)} isTextArea />
-                  <FormField label="Province" value={formData.identity?.province} onChange={(v) => updateField("identity", "province", v)} />
-                  <FormField label="District" value={formData.identity?.district} onChange={(v) => updateField("identity", "district", v)} />
-                  <FormField label="Local Municipality" value={formData.identity?.municipality} onChange={(v) => updateField("identity", "municipality", v)} />
-                  <FormField label="Highest Education" value={formData.identity?.education} onChange={(v) => updateField("identity", "education", v)} />
+                  <FormField label="Name of the business" value={formData.identity?.businessName} onChange={(v: string) => updateField("identity", "businessName", v)} />
+                  <FormField label="Registration Number" value={formData.identity?.regNumber} onChange={(v: string) => updateField("identity", "regNumber", v)} />
+                  <FormField label="Tax Number" value={formData.identity?.taxNumber} onChange={(v: string) => updateField("identity", "taxNumber", v)} />
+                  <FormField label="Voucher No" value={formData.identity?.voucherNo} onChange={(v: string) => updateField("identity", "voucherNo", v)} />
+                  <FormField label="COIDA Reg Number" value={formData.identity?.coidaNumber} onChange={(v: string) => updateField("identity", "coidaNumber", v)} />
+                  <FormField label="PAYE Reg Number" value={formData.identity?.payeNumber} onChange={(v: string) => updateField("identity", "payeNumber", v)} />
+                  <FormField label="UIF Reg Number" value={formData.identity?.uifNumber} onChange={(v: string) => updateField("identity", "uifNumber", v)} />
+                  <FormField label="Physical Address" value={formData.identity?.address} onChange={(v: string) => updateField("identity", "address", v)} isTextArea />
+                  <FormField label="Province" value={formData.identity?.province} onChange={(v: string) => updateField("identity", "province", v)} />
+                  <FormField label="District" value={formData.identity?.district} onChange={(v: string) => updateField("identity", "district", v)} />
+                  <FormField label="Local Municipality" value={formData.identity?.municipality} onChange={(v: string) => updateField("identity", "municipality", v)} />
+                  <FormField label="Highest Education" value={formData.identity?.education} onChange={(v: string) => updateField("identity", "education", v)} />
                   
                   <div className="md:col-span-2 mt-4">
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4 ml-1">Names of the Directors (Name & ID)</p>
@@ -182,36 +182,36 @@ export default function BusinessPlanForm({ caseId, initialData, onSave }: Busine
 
               {activeSection === "strategic" && (
                 <div className="space-y-8">
-                  <FormField label="Vision of the business" value={formData.strategic?.vision} onChange={(v) => updateField("strategic", "vision", v)} isTextArea />
-                  <FormField label="Mission of the business" value={formData.strategic?.mission} onChange={(v) => updateField("strategic", "mission", v)} isTextArea />
+                  <FormField label="Vision of the business" value={formData.strategic?.vision} onChange={(v: string) => updateField("strategic", "vision", v)} isTextArea />
+                  <FormField label="Mission of the business" value={formData.strategic?.mission} onChange={(v: string) => updateField("strategic", "mission", v)} isTextArea />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormField label="When did you start this business?" value={formData.strategic?.startDate} onChange={(v) => updateField("strategic", "startDate", v)} />
-                    <FormField label="Why did you start this business?" value={formData.strategic?.startReason} onChange={(v) => updateField("strategic", "startReason", v)} />
+                    <FormField label="When did you start this business?" value={formData.strategic?.startDate} onChange={(v: string) => updateField("strategic", "startDate", v)} />
+                    <FormField label="Why did you start this business?" value={formData.strategic?.startReason} onChange={(v: string) => updateField("strategic", "startReason", v)} />
                   </div>
                 </div>
               )}
 
               {activeSection === "swot" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField label="Strengths" value={formData.swot?.strengths} onChange={(v) => updateField("swot", "strengths", v)} isTextArea />
-                  <FormField label="Weaknesses" value={formData.swot?.weaknesses} onChange={(v) => updateField("swot", "weaknesses", v)} isTextArea />
-                  <FormField label="Opportunities" value={formData.swot?.opportunities} onChange={(v) => updateField("swot", "opportunities", v)} isTextArea />
-                  <FormField label="Threats" value={formData.swot?.threats} onChange={(v) => updateField("swot", "threats", v)} isTextArea />
+                  <FormField label="Strengths" value={formData.swot?.strengths} onChange={(v: string) => updateField("swot", "strengths", v)} isTextArea />
+                  <FormField label="Weaknesses" value={formData.swot?.weaknesses} onChange={(v: string) => updateField("swot", "weaknesses", v)} isTextArea />
+                  <FormField label="Opportunities" value={formData.swot?.opportunities} onChange={(v: string) => updateField("swot", "opportunities", v)} isTextArea />
+                  <FormField label="Threats" value={formData.swot?.threats} onChange={(v: string) => updateField("swot", "threats", v)} isTextArea />
                 </div>
               )}
 
               {activeSection === "market" && (
                 <div className="space-y-8">
-                  <FormField label="What community needs or problems do you want to solve?" value={formData.market?.needs} onChange={(v) => updateField("market", "needs", v)} isTextArea />
-                  <FormField label="What service or product are you providing?" value={formData.market?.product} onChange={(v) => updateField("market", "product", v)} isTextArea />
+                  <FormField label="What community needs or problems do you want to solve?" value={formData.market?.needs} onChange={(v: string) => updateField("market", "needs", v)} isTextArea />
+                  <FormField label="What service or product are you providing?" value={formData.market?.product} onChange={(v: string) => updateField("market", "product", v)} isTextArea />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormField label="Who are your potential clients?" value={formData.market?.potentialClients} onChange={(v) => updateField("market", "potentialClients", v)} />
-                    <FormField label="Where are your potential customers based?" value={formData.market?.customerBase} onChange={(v) => updateField("market", "customerBase", v)} />
+                    <FormField label="Who are your potential clients?" value={formData.market?.potentialClients} onChange={(v: string) => updateField("market", "potentialClients", v)} />
+                    <FormField label="Where are your potential customers based?" value={formData.market?.customerBase} onChange={(v: string) => updateField("market", "customerBase", v)} />
                   </div>
-                  <FormField label="What is the profile of your potential customers (age, lifestyle, income)?" value={formData.market?.customerProfile} onChange={(v) => updateField("market", "customerProfile", v)} isTextArea />
+                  <FormField label="What is the profile of your potential customers (age, lifestyle, income)?" value={formData.market?.customerProfile} onChange={(v: string) => updateField("market", "customerProfile", v)} isTextArea />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormField label="What is the size of your market in rand value?" value={formData.market?.marketSize} onChange={(v) => updateField("market", "marketSize", v)} />
-                    <FormField label="Percentage of market to capture & strategy" value={formData.market?.marketStrategy} onChange={(v) => updateField("market", "marketStrategy", v)} />
+                    <FormField label="What is the size of your market in rand value?" value={formData.market?.marketSize} onChange={(v: string) => updateField("market", "marketSize", v)} />
+                    <FormField label="Percentage of market to capture & strategy" value={formData.market?.marketStrategy} onChange={(v: string) => updateField("market", "marketStrategy", v)} />
                   </div>
                 </div>
               )}
@@ -219,39 +219,39 @@ export default function BusinessPlanForm({ caseId, initialData, onSave }: Busine
               {activeSection === "operations" && (
                 <div className="space-y-8">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormField label="Place (Rural/Urban)" value={formData.operations?.place} onChange={(v) => updateField("operations", "place", v)} />
-                    <FormField label="Office (Rented or Owned)" value={formData.operations?.officeStatus} onChange={(v) => updateField("operations", "officeStatus", v)} />
-                    <FormField label="Factory/Farm Size" value={formData.operations?.size} onChange={(v) => updateField("operations", "size", v)} />
-                    <FormField label="Electricity & Services" value={formData.operations?.services} onChange={(v) => updateField("operations", "services", v)} />
+                    <FormField label="Place (Rural/Urban)" value={formData.operations?.place} onChange={(v: string) => updateField("operations", "place", v)} />
+                    <FormField label="Office (Rented or Owned)" value={formData.operations?.officeStatus} onChange={(v: string) => updateField("operations", "officeStatus", v)} />
+                    <FormField label="Factory/Farm Size" value={formData.operations?.size} onChange={(v: string) => updateField("operations", "size", v)} />
+                    <FormField label="Electricity & Services" value={formData.operations?.services} onChange={(v: string) => updateField("operations", "services", v)} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <FormField label="Parking space" value={formData.operations?.parking} onChange={(v) => updateField("operations", "parking", v)} />
-                    <FormField label="Security" value={formData.operations?.security} onChange={(v) => updateField("operations", "security", v)} />
-                    <FormField label="Production Process" value={formData.operations?.process} onChange={(v) => updateField("operations", "process", v)} />
+                    <FormField label="Parking space" value={formData.operations?.parking} onChange={(v: string) => updateField("operations", "parking", v)} />
+                    <FormField label="Security" value={formData.operations?.security} onChange={(v: string) => updateField("operations", "security", v)} />
+                    <FormField label="Production Process" value={formData.operations?.process} onChange={(v: string) => updateField("operations", "process", v)} />
                   </div>
-                  <FormField label="Who are your suppliers & why chose them?" value={formData.operations?.suppliers} onChange={(v) => updateField("operations", "suppliers", v)} isTextArea />
+                  <FormField label="Who are your suppliers & why chose them?" value={formData.operations?.suppliers} onChange={(v: string) => updateField("operations", "suppliers", v)} isTextArea />
                 </div>
               )}
 
               {activeSection === "hr" && (
                 <div className="space-y-8">
-                  <FormField label="Management Team & Roles" value={formData.hr?.management} onChange={(v) => updateField("hr", "management", v)} isTextArea placeholder="Name - Role - Experience..." />
-                  <FormField label="Who are you going to employ & their roles?" value={formData.hr?.employees} onChange={(v) => updateField("hr", "employees", v)} isTextArea />
-                  <FormField label="Salary/Wage estimates" value={formData.hr?.salaries} onChange={(v) => updateField("hr", "salaries", v)} />
+                  <FormField label="Management Team & Roles" value={formData.hr?.management} onChange={(v: string) => updateField("hr", "management", v)} isTextArea placeholder="Name - Role - Experience..." />
+                  <FormField label="Who are you going to employ & their roles?" value={formData.hr?.employees} onChange={(v: string) => updateField("hr", "employees", v)} isTextArea />
+                  <FormField label="Salary/Wage estimates" value={formData.hr?.salaries} onChange={(v: string) => updateField("hr", "salaries", v)} />
                 </div>
               )}
 
               {activeSection === "finance" && (
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormField label="Amount required (ZAR)" value={formData.finance?.amountRequired} onChange={(v) => updateField("finance", "amountRequired", v)} />
-                    <FormField label="Own contribution (ZAR)" value={formData.finance?.contribution} onChange={(v) => updateField("finance", "contribution", v)} />
+                    <FormField label="Amount required (ZAR)" value={formData.finance?.amountRequired} onChange={(v: string) => updateField("finance", "amountRequired", v)} />
+                    <FormField label="Own contribution (ZAR)" value={formData.finance?.contribution} onChange={(v: string) => updateField("finance", "contribution", v)} />
                   </div>
-                  <FormField label="Use of funds (Item/Price list)" value={formData.finance?.useOfFunds} onChange={(v) => updateField("finance", "useOfFunds", v)} isTextArea />
+                  <FormField label="Use of funds (Item/Price list)" value={formData.finance?.useOfFunds} onChange={(v: string) => updateField("finance", "useOfFunds", v)} isTextArea />
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <FormField label="Items sold per month" value={formData.finance?.salesVolume} onChange={(v) => updateField("finance", "salesVolume", v)} />
-                    <FormField label="Unit selling price" value={formData.finance?.unitPrice} onChange={(v) => updateField("finance", "unitPrice", v)} />
-                    <FormField label="Break-even Point" value={formData.finance?.breakEven} onChange={(v) => updateField("finance", "breakEven", v)} />
+                    <FormField label="Items sold per month" value={formData.finance?.salesVolume} onChange={(v: string) => updateField("finance", "salesVolume", v)} />
+                    <FormField label="Unit selling price" value={formData.finance?.unitPrice} onChange={(v: string) => updateField("finance", "unitPrice", v)} />
+                    <FormField label="Break-even Point" value={formData.finance?.breakEven} onChange={(v: string) => updateField("finance", "breakEven", v)} />
                   </div>
                 </div>
               )}
