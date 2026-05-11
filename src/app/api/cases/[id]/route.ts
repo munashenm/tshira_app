@@ -182,6 +182,15 @@ export async function PATCH(
         message: notificationTemplates.caseAssigned("Data Collection Officer", ref)
       });
     }
+    if (consultantId && updatedCase.consultant) {
+      await sendNotification({
+        to: updatedCase.consultant.email || "",
+        name: updatedCase.consultant.name || "Consultant",
+        type: "BOTH",
+        caseRef: ref,
+        message: notificationTemplates.caseAssigned("Business Consultant", ref)
+      });
+    }
 
     // 2. Status & Review Notifications
     if (status) {
