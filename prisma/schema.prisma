@@ -107,12 +107,15 @@ model Case {
 
   coordinatorId       String?
   coordinator         User?      @relation("AssignedCoordinator", fields: [coordinatorId], references: [id])
+  coordinatorAcceptedAt DateTime?
   
   dcoId               String?
   dco                 User?      @relation("AssignedDco", fields: [dcoId], references: [id])
+  dcoAcceptedAt         DateTime?
   
   consultantId        String?
   consultant          User?      @relation("AssignedConsultant", fields: [consultantId], references: [id])
+  consultantAcceptedAt  DateTime?
   
   reviewerId          String?
   reviewer            User?      @relation("AssignedReviewer", fields: [reviewerId], references: [id])

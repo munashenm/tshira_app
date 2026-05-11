@@ -27,6 +27,9 @@ import BusinessPlanForm from "@/components/forms/BusinessPlanForm";
 import ClientChecklistForm from "@/components/forms/ClientChecklistForm";
 import ClientRegistrationForm from "@/components/forms/ClientRegistrationForm";
 import WorkAllocationManager from "@/components/forms/WorkAllocationManager";
+import AssignmentResponseBanner from "@/components/AssignmentResponseBanner";
+
+import { getSessionActorFromCookies } from "@/lib/session";
 
 export default async function CaseDetailPage({
   params,
@@ -58,12 +61,25 @@ export default async function CaseDetailPage({
 
   if (!c) return <div className="p-8 text-center">Case not found.</div>;
 
+  const actor = await getSessionActorFromCookies();
+  let pendingAssignment = false;
+  if (actor) {
+    if (c.coordinatorId === actor.id && !c.coordinatorAcceptedAt) pendingAssignment = true;
+    if (c.dcoId === actor.id && !c.dcoAcceptedAt) pendingAssignment = true;
+    if (c.consultantId === actor.id && !c.consultantAcceptedAt) pendingAssignment = true;
+  }
+
+  const isAssignedToUser = actor && (c.coordinatorId === actor.id || c.dcoId === actor.id || c.consultantId === actor.id);
+  const isInvoiced = c.invoiceNumber != null || c.status === "INVOICED" || c.status === "PAID";
+
   return (
     <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen pb-24">
       <Link href="/cases" className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors text-sm">
         <ArrowLeft className="w-4 h-4" />
         Back to Workflow Tasks
       </Link>
+
+      {pendingAssignment && <AssignmentResponseBanner caseId={c.id} />}
 
       <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
         <div className="space-y-2 w-full">
@@ -139,9 +155,9 @@ export default async function CaseDetailPage({
                 <div className="bg-white dark:bg-zinc-900 rounded-3xl p-5 sm:p-8 border border-zinc-200 dark:border-zinc-800 shadow-sm">
                   <h3 className="text-lg font-bold mb-6">Team Assignment List</h3>
                   <div className="space-y-6">
-                    <UserRow roleName="Coordinator" role={Role.PROVINCIAL_COORDINATOR} name={c.coordinator?.name} caseId={c.id} province={c.province} />
-                    <UserRow roleName="Field Officer" role={Role.DATA_COLLECTION_OFFICER} name={c.dco?.name} caseId={c.id} province={c.province} />
-                    <UserRow roleName="Consultant" role={Role.BUSINESS_CONSULTANT} name={c.consultant?.name} caseId={c.id} province={c.province} />
+                    <UserRow roleName="Coordinator" role={Role.PROVINCIAL_COORDINATOR} name={c.coordinator?.name} caseId={c.id} province={c.province} acceptedAt={c.coordinatorAcceptedAt} />
+                    <UserRow roleName="Field Officer" role={Role.DATA_COLLECTION_OFFICER} name={c.dco?.name} caseId={c.id} province={c.province} acceptedAt={c.dcoAcceptedAt} />
+                    <UserRow roleName="Consultant" role={Role.BUSINESS_CONSULTANT} name={c.consultant?.name} caseId={c.id} province={c.province} acceptedAt={c.consultantAcceptedAt} />
                     <UserRow roleName="Reviewer" role={Role.REVIEWER} name={c.reviewer?.name} caseId={c.id} province={c.province} />
                   </div>
                 </div>
@@ -243,6 +259,25 @@ export default async function CaseDetailPage({
               <p className="text-[10px] sm:text-xs text-blue-100 italic">Deadline: {new Date(c.slaDeadline || c.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
             </div>
           </div>
+
+          <div className={`rounded-3xl p-6 sm:p-8 shadow-sm border ${isInvoiced ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-900/30 text-emerald-900 dark:text-emerald-50" : "bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50"}`}>
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle2 className={`w-6 h-6 ${isInvoiced ? "text-emerald-500" : "text-zinc-400"}`} />
+              <h3 className="text-lg font-bold">Invoice Status</h3>
+            </div>
+            {isInvoiced ? (
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">Processed</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/70 mt-2">Work has been invoiced</p>
+                {c.invoiceNumber && <p className="text-xs font-mono mt-1 text-emerald-700 dark:text-emerald-300">Inv: {c.invoiceNumber}</p>}
+              </div>
+            ) : (
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-zinc-300 dark:text-zinc-700">Pending</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mt-2">Not yet invoiced</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <style>{`
@@ -299,13 +334,18 @@ function TimelineStep({ status, currentStatus, label, date, user }: { status: Ca
   );
 }
 
-function UserRow({ roleName, role, name, caseId, province }: { roleName: string, role: Role, name?: string | null, caseId: string, province: string }) {
+function UserRow({ roleName, role, name, caseId, province, acceptedAt }: { roleName: string, role: Role, name?: string | null, caseId: string, province: string, acceptedAt?: Date | null }) {
   return (
     <div className="flex items-center justify-between group">
       <div>
         <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{roleName}</p>
-        <p className={`text-sm font-semibold ${name ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-300 italic"}`}>
+        <p className={`text-sm font-semibold flex items-center gap-2 ${name ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-300 italic"}`}>
           {name || "Unassigned"}
+          {name && !acceptedAt && (
+            <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-widest font-black">
+              Pending
+            </span>
+          )}
         </p>
       </div>
       <UserAssignmentModal caseId={caseId} role={role} label={roleName} caseProvince={province} />
