@@ -147,7 +147,7 @@ export default function DashboardOverview() {
           color="orange" 
         />
         <StatCard title="Overdue" value={data.overdueCount} icon={<AlertCircle />} color="red" />
-
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Left Column: My Tasks + Distribution */}
