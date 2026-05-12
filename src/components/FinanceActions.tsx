@@ -97,50 +97,56 @@ export default function FinanceActions({
 
       {/* Invoice form with auto-generated number */}
       {showInvoiceForm && (
-        <div className="absolute right-0 bottom-full mb-2 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 z-50 animate-in slide-in-from-bottom-2">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Create Invoice</h4>
-            <button onClick={() => setShowInvoiceForm(false)} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Invoice Number</label>
-              <div className="relative">
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs z-[9998]" 
+            onClick={() => setShowInvoiceForm(false)} 
+          />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl p-6 z-[9999] animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-5">
+              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Create Invoice</h4>
+              <button onClick={() => setShowInvoiceForm(false)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-all">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Invoice Number</label>
+                <div className="relative">
+                  <input
+                    placeholder="Auto-generated"
+                    value={invoiceDetails.invoiceNumber}
+                    onChange={(e) => setInvoiceDetails({ ...invoiceDetails, invoiceNumber: e.target.value })}
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold text-blue-700 dark:text-blue-400"
+                  />
+                </div>
+                <p className="text-[10px] text-zinc-400">Auto-generated — edit if needed</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount (ZAR)</label>
                 <input
-                  placeholder="Auto-generated"
-                  value={invoiceDetails.invoiceNumber}
-                  onChange={(e) => setInvoiceDetails({ ...invoiceDetails, invoiceNumber: e.target.value })}
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold text-blue-700"
+                  type="number"
+                  placeholder="0.00"
+                  value={invoiceDetails.actualCost}
+                  onChange={(e) => setInvoiceDetails({ ...invoiceDetails, actualCost: e.target.value })}
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
-              <p className="text-[10px] text-zinc-400">Auto-generated — edit if needed</p>
+              <button
+                disabled={!invoiceDetails.invoiceNumber || !invoiceDetails.actualCost || isSubmitting}
+                onClick={() => handleUpdate(CaseStatus.INVOICED, {
+                  invoiceNumber: invoiceDetails.invoiceNumber,
+                  actualCost: parseFloat(invoiceDetails.actualCost),
+                  invoiceDate: new Date()
+                })}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-40 hover:scale-[1.01] transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+              >
+                {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                {isSubmitting ? "Saving..." : "Save & Mark Invoiced"}
+              </button>
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount (ZAR)</label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={invoiceDetails.actualCost}
-                onChange={(e) => setInvoiceDetails({ ...invoiceDetails, actualCost: e.target.value })}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <button
-              disabled={!invoiceDetails.invoiceNumber || !invoiceDetails.actualCost || isSubmitting}
-              onClick={() => handleUpdate(CaseStatus.INVOICED, {
-                invoiceNumber: invoiceDetails.invoiceNumber,
-                actualCost: parseFloat(invoiceDetails.actualCost),
-                invoiceDate: new Date()
-              })}
-              className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-blue-700 transition-all"
-            >
-              {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-              {isSubmitting ? "Saving..." : "Save & Mark Invoiced"}
-            </button>
           </div>
-        </div>
+        </>
       )}
 
       {/* Delivery options after invoicing */}

@@ -215,14 +215,48 @@ export default function InvoicePage() {
 
       <style>{`
         @media print {
-          body { background: white !important; margin: 0; padding: 0 !important; }
+          body { 
+            background: white !important; 
+            color: #000 !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important;
+          }
           .print\\:hidden { display: none !important; }
-          .max-w-4xl { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
-          .py-8, .px-4 { padding: 0 !important; }
+          .max-w-4xl { 
+            max-width: 100% !important; 
+            margin: 0 !important; 
+            width: 100% !important; 
+            box-shadow: none !important;
+            border-radius: 0 !important;
+          }
           .bg-zinc-100 { background: white !important; }
           .shadow-2xl { box-shadow: none !important; }
           .rounded-3xl { border-radius: 0 !important; }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          
+          /* Enforce high-contrast dark header background for print */
+          .bg-zinc-900 { 
+            background-color: #18181b !important; 
+            color: #ffffff !important; 
+          }
+          .bg-zinc-900 * {
+            color: #ffffff !important;
+          }
+          .bg-zinc-900 .text-zinc-400 {
+            color: #a1a1aa !important;
+          }
+          .bg-zinc-50 {
+            background-color: #f4f4f5 !important;
+          }
+          
+          /* Prevent layout breaks */
+          table { page-break-inside: avoid; }
+          tr { page-break-inside: avoid; }
+          
+          /* Adjust padding for clean fit on standard A4 page */
+          .px-12 { padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
+          .py-10 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
         }
       `}</style>
     </div>
