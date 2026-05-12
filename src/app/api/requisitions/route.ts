@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const auth = await requireActor(request);
     if (!auth.ok) return auth.response;
 
-    const roleError = requireRoles(auth.context, [Role.PROVINCIAL_COORDINATOR, Role.DATA_COLLECTION_OFFICER]);
+    const roleError = requireRoles(auth.context, [Role.ADMIN_OFFICER, Role.PROVINCIAL_COORDINATOR, Role.DATA_COLLECTION_OFFICER]);
     if (roleError) return roleError;
 
     const { province, location, dateTime, purpose, isClientVisit, estimatedCost, clientId } = body;

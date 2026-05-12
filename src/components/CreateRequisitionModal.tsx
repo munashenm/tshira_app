@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Plus, Calendar, MapPin, Info } from "lucide-react";
 import { Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { getClientActor } from "@/lib/client-auth";
+import { useSimulation } from "@/lib/SimulationContext";
 
 export default function CreateRequisitionModal({ clients }: { clients: { id: string, name: string, companyName: string | null }[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { currentPersona } = useSimulation();
 
   const [selectedProvince, setSelectedProvince] = useState<string>("LIMPOPO");
+
+  useEffect(() => {
+    if (currentPersona?.province) {
+      setSelectedProvince(currentPersona.province);
+    }
+  }, [currentPersona]);
 
   const [formData, setFormData] = useState({
     location: "",
@@ -39,10 +47,22 @@ export default function CreateRequisitionModal({ clients }: { clients: { id: str
       });
       if (res.ok) {
         setIsOpen(false);
+        setFormData({
+          location: "",
+          dateTime: "",
+          purpose: "",
+          isClientVisit: false,
+          clientId: "",
+          estimatedCost: 0,
+        });
         router.refresh();
+      } else {
+        const errData = await res.json();
+        alert(`Submission Failed: ${errData.error || "Please check your inputs and try again."}`);
       }
     } catch (error) {
       console.error(error);
+      alert("Submission Failed: Network error or server is offline.");
     } finally {
       setIsSubmitting(false);
     }
