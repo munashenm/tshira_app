@@ -42,7 +42,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: <Briefcase />, label: "Workflow Tasks", href: "/cases" },
     { icon: <Users />, label: "Clients", href: "/clients" },
     { icon: <CalendarDays />, label: "Requisitions", href: "/requisitions" },
-    { icon: <Receipt />, label: "Finance", href: "/finance" },
+    { icon: <Receipt />, label: "Billing", href: "/finance" },
     { icon: <TrendingDown />, label: "Expenses", href: "/finance/expenses" },
     { icon: <UserCircle />, label: "Team", href: "/team" },
     { icon: <FileText />, label: "Reports", href: "/reports" },

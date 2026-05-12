@@ -83,16 +83,23 @@ export default function FinanceActions({
 
   return (
     <div className="flex justify-end gap-2 relative">
-      {/* Generate Invoice — for any uninvoiced case */}
-      {(status !== "INVOICED" && status !== "PAID" && status !== "CLOSED") && !showInvoiceForm && (
+      {/* Generate Invoice — only for completed/approved cases */}
+      {(status === "CLIENT_APPROVED" || status === "READY_FOR_INVOICING") && !showInvoiceForm && (
         <button
           onClick={handleOpenInvoiceForm}
           disabled={generatingNumber}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-60"
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-60 cursor-pointer"
         >
           {generatingNumber ? <Loader2 className="w-4 h-4 animate-spin" /> : <Receipt className="w-4 h-4" />}
           {generatingNumber ? "Generating..." : "Generate Invoice"}
         </button>
+      )}
+
+      {/* Helper indicator if case is not completed/approved and not yet invoiced/paid */}
+      {(!["CLIENT_APPROVED", "READY_FOR_INVOICING", "INVOICED", "PAID", "CLOSED"].includes(status)) && (
+        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50">
+          Work In Progress
+        </span>
       )}
 
       {/* Invoice form with auto-generated number */}

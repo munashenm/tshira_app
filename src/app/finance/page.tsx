@@ -27,8 +27,8 @@ export default async function FinancePage() {
   return (
     <div className="p-8 space-y-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <div>
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Invoicing Tracker</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-2">Generate and manage invoices for all active work items.</p>
+        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Billing Tracker</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-2">Generate and manage invoices for completed client work items.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -41,9 +41,9 @@ export default async function FinancePage() {
         <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/30 dark:bg-zinc-800/20">
           <h3 className="font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <Receipt className="w-5 h-5 text-zinc-400" />
-            All Work Items ({cases.length})
+            Billing Queue ({cases.length})
           </h3>
-          <p className="text-xs text-zinc-400">Click "Generate Invoice" on any row to create an invoice</p>
+          <p className="text-xs text-zinc-400">Invoices can only be generated for completed or client-approved cases.</p>
         </div>
         <table className="w-full text-left border-collapse">
           <thead>
