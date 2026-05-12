@@ -95,7 +95,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 icon={item.icon} 
                 label={item.label} 
                 href={item.href} 
-                active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)} 
+                active={item.href === "/" ? pathname === "/" : item.href === "/finance" ? pathname === "/finance" : pathname.startsWith(item.href)} 
                 onClick={onClose}
               />
             ))}
