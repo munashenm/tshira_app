@@ -14,7 +14,8 @@ import {
   ArrowUpDown,
   Download,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  FileText
 } from "lucide-react";
 import Link from "next/link";
 import { CaseStatus, Province, User, Role } from "@prisma/client";
@@ -40,6 +41,46 @@ export default function CasesPage() {
   useEffect(() => {
     fetchCases();
   }, []);
+
+  const exportToPDF = async () => {
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+      
+      const doc = new jsPDF("l", "pt", "a4");
+      doc.setFontSize(16);
+      doc.text("Tshira Workflow Management - Cases Export", 40, 40);
+      doc.setFontSize(10);
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 40, 55);
+      
+      const headers = [
+        ['NYDA Reference', 'Client Name', 'Output Type', 'Province', 'Status', 'Coordinator']
+      ];
+      
+      const rows = filteredCases.map(c => [
+        c.nydaReference || 'N/A',
+        c.clientName,
+        c.outputType,
+        c.province.replace('_', ' '),
+        c.status.replace(/_/g, ' '),
+        c.coordinator?.name || 'Unassigned'
+      ]);
+      
+      autoTable(doc, {
+        head: headers,
+        body: rows,
+        startY: 70,
+        theme: "striped",
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [59, 130, 246] }
+      });
+      
+      doc.save(`tshira-cases-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      alert("Failed to export PDF.");
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -156,8 +197,11 @@ export default function CasesPage() {
             </>
           )}
           <a href="/api/export/cases" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> Export CSV
           </a>
+          <button onClick={exportToPDF} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer">
+            <FileText className="w-4 h-4" /> Export PDF
+          </button>
         </div>
       </div>
 

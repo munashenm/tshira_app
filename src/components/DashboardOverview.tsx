@@ -22,7 +22,6 @@ import { Province, CaseStatus, Role } from "@prisma/client";
 import Link from "next/link";
 import { useSimulation } from "@/lib/SimulationContext";
 import CreateCaseForm from "./CreateCaseForm";
-import ProcessFlowVisualizer from "./ProcessFlowVisualizer";
 import ProvincialBreakdown from "./ProvincialBreakdown";
 
 interface DashboardStats {
@@ -148,9 +147,7 @@ export default function DashboardOverview() {
           color="orange" 
         />
         <StatCard title="Overdue" value={data.overdueCount} icon={<AlertCircle />} color="red" />
-      </div>
 
-      <ProcessFlowVisualizer />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Left Column: My Tasks + Distribution */}
