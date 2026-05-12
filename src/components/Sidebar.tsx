@@ -12,7 +12,8 @@ import {
   TrendingDown,
   UserCircle,
   X,
-  ClipboardList
+  ClipboardList,
+  ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -45,6 +46,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: <TrendingDown />, label: "Expenses", href: "/finance/expenses" },
     { icon: <UserCircle />, label: "Team", href: "/team" },
     { icon: <FileText />, label: "Reports", href: "/reports" },
+    { icon: <ShieldCheck />, label: "Audit Trail", href: "/audit" },
   ];
 
   return (

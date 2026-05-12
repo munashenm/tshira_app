@@ -25,8 +25,18 @@ export default function GlobalSearch() {
         setIsOpen(false);
       }
     }
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const handleSearch = (value: string) => {
@@ -68,7 +78,7 @@ export default function GlobalSearch() {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => results && setIsOpen(true)}
-          placeholder="Search..."
+          placeholder="Search... (Ctrl+K)"
           className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl pl-10 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-zinc-400 truncate"
         />
         {isLoading && (
