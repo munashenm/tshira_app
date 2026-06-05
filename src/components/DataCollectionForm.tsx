@@ -43,6 +43,8 @@ export default function DataCollectionForm({
 
   const canEdit = currentPersona?.role === Role.DATA_COLLECTION_OFFICER || currentPersona?.role === Role.ADMIN_OFFICER;
   const isCorrectStage = ["ASSIGNED_FOR_DATA_COLLECTION", "DATA_COLLECTION_IN_PROGRESS", "RETURNED_FOR_DATA_CORRECTION"].includes(currentStatus);
+  const isAdminCaptured = !!(clientData?.idNumber || initialId);
+  const identityReadOnly = isAdminCaptured && currentPersona?.role !== Role.ADMIN_OFFICER;
 
   const validate = () => {
     const newErrors: string[] = [];
@@ -131,7 +133,7 @@ export default function DataCollectionForm({
             onChange={(v) => setIdNumber(v.replace(/\D/g, ""))} 
             placeholder="9001015000081" 
             maxLength={13} 
-            disabled={!isCorrectStage} 
+            disabled={!isCorrectStage || identityReadOnly} 
             icon={idNumber && (validateSAID(idNumber) ? <CheckCircle2 className="text-emerald-500" /> : <AlertCircle className="text-red-500" />)} 
           />
           <Input 
@@ -140,7 +142,7 @@ export default function DataCollectionForm({
             onChange={(v) => setPhone(v.replace(/\D/g, ""))} 
             placeholder="0820000000" 
             maxLength={10} 
-            disabled={!isCorrectStage}
+            disabled={!isCorrectStage || identityReadOnly}
             icon={phone && (isValidSAPhone(phone) ? <CheckCircle2 className="text-emerald-500" /> : <AlertCircle className="text-red-500" />)} 
           />
         </div>

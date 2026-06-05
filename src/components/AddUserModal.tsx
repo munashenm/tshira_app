@@ -18,6 +18,7 @@ export default function AddUserModal() {
     district: "",
     municipality: ""
   });
+  const [additionalProvinces, setAdditionalProvinces] = useState<Province[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -32,7 +33,8 @@ export default function AddUserModal() {
         body: JSON.stringify({
           ...formData,
           userId: actor?.id,
-          province: formData.province || null
+          province: formData.province || null,
+          additionalProvinces,
         }),
       });
       if (res.ok) {
@@ -47,6 +49,7 @@ export default function AddUserModal() {
             district: "",
             municipality: ""
         });
+        setAdditionalProvinces([]);
         router.refresh();
       } else {
           const err = await res.json();
@@ -169,6 +172,30 @@ export default function AddUserModal() {
               </div>
             </div>
             
+            <div className="space-y-2 col-span-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Additional Provinces (Cross-Branch Access)</label>
+              <p className="text-[10px] text-zinc-400">Primary province above is their home branch. Select other provinces they may also work in.</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                {Object.values(Province).filter(p => p !== formData.province).map(p => (
+                  <label key={p} className="flex items-center gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={additionalProvinces.includes(p)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAdditionalProvinces([...additionalProvinces, p]);
+                        } else {
+                          setAdditionalProvinces(additionalProvinces.filter(x => x !== p));
+                        }
+                      }}
+                      className="rounded text-blue-600"
+                    />
+                    <span className="text-[10px] font-bold uppercase">{p.replace(/_/g, " ")}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">District</label>
               <div className="relative">

@@ -86,6 +86,14 @@ export default function ClientRegistrationForm({ caseData }: ClientRegistrationF
           </Section>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+          <ReadOnlyField label="Client Name" value={caseData.clientName} />
+          <ReadOnlyField label="SA ID Number" value={caseData.client?.idNumber} />
+          <ReadOnlyField label="Phone Number" value={caseData.client?.phone} />
+          <ReadOnlyField label="Email Address" value={caseData.client?.email} />
+          <ReadOnlyField label="Voucher Number" value={caseData.voucherAppNumber || caseData.nydaReference} />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-zinc-100 dark:border-zinc-800">
           <Section label="Location & Demographics">
             <InputField label="District" name="district" defaultValue={caseData.client?.district} icon={<MapPin className="w-4 h-4" />} />
@@ -146,6 +154,15 @@ function InputField({ label, name, defaultValue, icon, disabled }: { label: stri
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="space-y-2 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{label}</label>
+      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{value || "—"}</p>
     </div>
   );
 }

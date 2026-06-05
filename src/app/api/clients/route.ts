@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Province, Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
+import { provinceWhereClause } from "@/lib/provinces";
 import { sendNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function POST(request: Request) {
@@ -52,10 +53,20 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireActor(request);
+    if (!auth.ok) return auth.response;
+
+    const actorUser = await prisma.user.findUnique({
+      where: { id: auth.context.actor.id },
+      select: { role: true, province: true, provinceAssignments: { select: { province: true } } },
+    });
+    const provinceFilter = actorUser ? provinceWhereClause(actorUser) : {};
+
     const clients = await prisma.client.findMany({
-      orderBy: { name: 'asc' },
+      where: provinceFilter,
+      orderBy: { name: "asc" },
     });
     return NextResponse.json(clients);
   } catch (error) {

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Role, Province } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
+import { hashPassword } from "@/lib/security";
 
 export async function PATCH(
   request: Request,
@@ -16,7 +17,19 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { role, province, active, password, phone, district, municipality } = body;
+    const { role, province, active, password, phone, district, municipality, additionalProvinces } = body;
+
+    if (additionalProvinces !== undefined) {
+      const extraProvinces: Province[] = (additionalProvinces || []).filter(
+        (p: Province) => p && p !== province
+      );
+      await prisma.userProvinceAssignment.deleteMany({ where: { userId: id } });
+      if (extraProvinces.length > 0) {
+        await prisma.userProvinceAssignment.createMany({
+          data: extraProvinces.map((p: Province) => ({ userId: id, province: p })),
+        });
+      }
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -27,8 +40,11 @@ export async function PATCH(
         ...(district !== undefined && { district }),
         ...(municipality !== undefined && { municipality }),
         ...(active !== undefined && { active }),
-        ...(password !== undefined && { password }),
+        ...(password !== undefined && {
+          password: password.startsWith("$2") ? password : await hashPassword(password),
+        }),
       },
+      include: { provinceAssignments: true },
     });
 
     return NextResponse.json(updatedUser);

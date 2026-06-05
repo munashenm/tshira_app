@@ -119,4 +119,20 @@ export const notificationTemplates = {
   
   teamMemberAdded: (role: string, pass: string) =>
     `Welcome to the team! You have been added to the Tshira Workflow Management System as a ${role.replace(/_/g, ' ')}. Your temporary password is: ${pass}. Please log in and change your password immediately.`,
+
+  requisitionConfirmed: (details: {
+    clientName: string;
+    voucherNumber: string;
+    contactDetails: string;
+    meetingDate: string;
+    meetingTime: string;
+    meetingReference: string;
+  }) =>
+    `Your client visit has been confirmed.\n\n` +
+    `Client: ${details.clientName}\n` +
+    `Voucher Number: ${details.voucherNumber}\n` +
+    `Contact Details: ${details.contactDetails}\n` +
+    `Date of Meeting: ${details.meetingDate}\n` +
+    `Time of Meeting: ${details.meetingTime}\n` +
+    `Meeting Venue Reference: ${details.meetingReference}`,
 };

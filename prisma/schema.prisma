@@ -85,10 +85,24 @@ model User {
   assignedReviewerCases    Case[] @relation("AssignedReviewer")
 
   requisitions            Requisition[] @relation("RequisitionUser")
+  dcoRequisitions         Requisition[] @relation("RequisitionDco")
   approvedRequisitions    Requisition[] @relation("ApprovedBy")
   financeApprovedRequisitions Requisition[] @relation("FinanceApprovedBy")
   history                 CaseHistory[]
   expenses                Expense[]     @relation("ExpenseUser")
+  coordinatorExpenses     Expense[]     @relation("ExpenseCoordinator")
+  dcoExpenses             Expense[]     @relation("ExpenseDco")
+  provinceAssignments     UserProvinceAssignment[]
+}
+
+model UserProvinceAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  province  Province
+  createdAt DateTime @default(now())
+
+  @@unique([userId, province])
 }
 
 model Case {
@@ -184,17 +198,23 @@ model Client {
 }
 
 model Expense {
-  id          String   @id @default(cuid())
-  caseId      String?
-  case        Case?    @relation(fields: [caseId], references: [id])
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], name: "ExpenseUser")
-  amount      Float
-  category    String   // TRAVEL, MEALS, PRINTING, etc.
-  description String
-  receiptUrl  String?
-  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt   DateTime @default(now())
+  id              String    @id @default(cuid())
+  caseId          String?
+  case            Case?     @relation(fields: [caseId], references: [id])
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], name: "ExpenseUser")
+  province        Province?
+  coordinatorId   String?
+  coordinator     User?     @relation("ExpenseCoordinator", fields: [coordinatorId], references: [id])
+  dcoId           String?
+  dco             User?     @relation("ExpenseDco", fields: [dcoId], references: [id])
+  amount          Float
+  category        String    // TRAVEL, MEALS, ACCOMMODATION, etc.
+  description     String
+  paymentMethod   String?   // CASH, EFT, CARD, COMPANY_CARD
+  receiptUrl      String?
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt       DateTime  @default(now())
 }
 
 model CaseHistory {
@@ -220,29 +240,34 @@ model Document {
 }
 
 model Requisition {
-  id            String            @id @default(cuid())
-  province      Province
-  location      String
-  dateTime      DateTime
-  purpose       String
-  isClientVisit Boolean           @default(false)
-  estimatedCost Float?
-  status        RequisitionStatus @default(DRAFT)
+  id               String            @id @default(cuid())
+  province         Province
+  location         String
+  dateTime         DateTime
+  meetingTime      String?
+  meetingReference String?
+  purpose          String
+  isClientVisit    Boolean           @default(false)
+  estimatedCost    Float?
+  status           RequisitionStatus @default(DRAFT)
   
-  userId        String
-  user          User              @relation("RequisitionUser", fields: [userId], references: [id])
+  userId           String
+  user             User              @relation("RequisitionUser", fields: [userId], references: [id])
+
+  dcoId            String?
+  dco              User?             @relation("RequisitionDco", fields: [dcoId], references: [id])
   
-  approvedById  String?
-  approvedBy    User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedById     String?
+  approvedBy       User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
 
   financeApprovedById String?
-  financeApprovedBy   User?       @relation("FinanceApprovedBy", fields: [financeApprovedById], references: [id])
+  financeApprovedBy   User?          @relation("FinanceApprovedBy", fields: [financeApprovedById], references: [id])
 
-  clientId      String?
-  client        Client?           @relation("RequisitionClient", fields: [clientId], references: [id])
+  clientId         String?
+  client           Client?           @relation("RequisitionClient", fields: [clientId], references: [id])
 
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model FormResponse {

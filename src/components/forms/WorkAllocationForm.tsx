@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  ClipboardList, 
-  Save, 
-  Loader2,
-  User,
-  MapPin,
-  Building,
-  Briefcase
-} from "lucide-react";
+import { ClipboardList, Save, Loader2, User } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
+import { buildCapturedClientFields } from "@/lib/captured-client-data";
+import CapturedClientFields from "./CapturedClientFields";
 
 interface WorkAllocationFormProps {
   caseId: string;
@@ -22,18 +16,12 @@ interface WorkAllocationFormProps {
 
 export default function WorkAllocationForm({ caseId, initialData, clientData, caseData, onSave }: WorkAllocationFormProps) {
   const { currentPersona } = useSimulation();
+  const captured = buildCapturedClientFields(caseData, clientData);
   const [data, setData] = useState<any>({
     adminName: currentPersona?.name || "",
-    clientName: caseData?.clientName || clientData?.name || "",
-    idNumber: clientData?.idNumber || "",
-    businessName: clientData?.businessName || "",
-    voucherNumber: caseData?.nydaReference || "",
-    serviceRequired: caseData?.outputType?.replace(/_/g, ' ') || "",
-    province: caseData?.province?.replace(/_/g, ' ') || "",
-    district: "",
-    municipality: "",
     coordinatorName: caseData?.coordinator?.name || "",
-    ...initialData
+    ...captured,
+    ...initialData,
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -50,7 +38,7 @@ export default function WorkAllocationForm({ caseId, initialData, clientData, ca
         body: JSON.stringify({
           formType: "WORK_ALLOCATION",
           data,
-          submittedBy: currentPersona?.name
+          submittedBy: currentPersona?.name,
         }),
       });
       if (res.ok && onSave) onSave();
@@ -82,67 +70,11 @@ export default function WorkAllocationForm({ caseId, initialData, clientData, ca
       </div>
 
       <div className="p-8 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField 
-            label="Name of Admin" 
-            value={data.adminName} 
-            onChange={(v: string) => updateField("adminName", v)} 
-            icon={<User />} 
-          />
-          <FormField 
-            label="Name of the Client" 
-            value={data.clientName} 
-            onChange={(v: string) => updateField("clientName", v)} 
-            icon={<User />} 
-          />
-          <FormField 
-            label="ID Number" 
-            value={data.idNumber} 
-            onChange={(v: string) => updateField("idNumber", v)} 
-            icon={<Briefcase />} 
-          />
-          <FormField 
-            label="Business Name" 
-            value={data.businessName} 
-            onChange={(v: string) => updateField("businessName", v)} 
-            icon={<Building />} 
-          />
-          <FormField 
-            label="Voucher Number" 
-            value={data.voucherNumber} 
-            onChange={(v: string) => updateField("voucherNumber", v)} 
-            icon={<ClipboardList />} 
-          />
-          <FormField 
-            label="Service Required" 
-            value={data.serviceRequired} 
-            onChange={(v: string) => updateField("serviceRequired", v)} 
-            icon={<Briefcase />} 
-          />
-          <FormField 
-            label="Province" 
-            value={data.province} 
-            onChange={(v: string) => updateField("province", v)} 
-            icon={<MapPin />} 
-          />
-          <FormField 
-            label="District" 
-            value={data.district} 
-            onChange={(v: string) => updateField("district", v)} 
-            icon={<MapPin />} 
-          />
-          <FormField 
-            label="Local Municipality" 
-            value={data.municipality} 
-            onChange={(v: string) => updateField("municipality", v)} 
-            icon={<MapPin />} 
-          />
-          <FormField 
-            label="Name of Provincial Coordinator" 
-            value={data.coordinatorName} 
-            onChange={(v: string) => updateField("coordinatorName", v)} 
-            icon={<User />} 
-          />
+        <CapturedClientFields data={captured} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <FormField label="Name of Admin" value={data.adminName} onChange={(v: string) => updateField("adminName", v)} icon={<User />} />
+          <FormField label="Name of Provincial Coordinator" value={data.coordinatorName} onChange={(v: string) => updateField("coordinatorName", v)} icon={<User />} />
         </div>
       </div>
     </div>
@@ -157,7 +89,7 @@ function FormField({ label, value, onChange, icon, type = "text" }: any) {
         <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400">
           {React.cloneElement(icon, { className: "w-full h-full" })}
         </div>
-        <input 
+        <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}

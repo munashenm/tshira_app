@@ -20,6 +20,7 @@ export default async function TeamPage() {
   const users = await prisma.user.findMany({
     orderBy: { role: 'asc' },
     include: {
+      provinceAssignments: true,
       history: {
         take: 10,
         orderBy: { createdAt: 'desc' },
@@ -90,6 +91,12 @@ export default async function TeamPage() {
                             {user.province.replace(/_/g, ' ')}
                           </span>
                         )}
+                        {user.provinceAssignments?.map((a) => (
+                          <span key={a.id} className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center gap-2">
+                            <MapPin className="w-3 h-3" />
+                            +{a.province.replace(/_/g, ' ')}
+                          </span>
+                        ))}
                         <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${user.active ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-red-50 text-red-600'}`}>
                           {user.active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                           {user.active ? 'Live' : 'Inactive'}

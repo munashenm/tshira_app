@@ -20,6 +20,9 @@ export default function EditUserModal({ user }: { user: any }) {
   // Permissions State
   const [role, setRole] = useState<Role>(user.role);
   const [province, setProvince] = useState<Province | "">(user.province || "");
+  const [additionalProvinces, setAdditionalProvinces] = useState<Province[]>(
+    (user.provinceAssignments || []).map((a: { province: Province }) => a.province)
+  );
   const [active, setActive] = useState<boolean>(user.active ?? true);
   
   // Password State
@@ -41,6 +44,7 @@ export default function EditUserModal({ user }: { user: any }) {
         body: JSON.stringify({ 
           name, email, phone, district, municipality,
           role, province: province || null, active,
+          additionalProvinces: additionalProvinces.filter(p => p !== province),
           userId: actor?.id 
         }),
       });
@@ -226,6 +230,27 @@ export default function EditUserModal({ user }: { user: any }) {
                     <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
                   ))}
                 </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                  <MapPin className="w-3 h-3" /> Additional Provinces (Cross-Branch)
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.values(Province).filter(p => p !== province).map(p => (
+                    <label key={p} className="flex items-center gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={additionalProvinces.includes(p)}
+                        onChange={(e) => {
+                          if (e.target.checked) setAdditionalProvinces([...additionalProvinces, p]);
+                          else setAdditionalProvinces(additionalProvinces.filter(x => x !== p));
+                        }}
+                        className="rounded text-blue-600"
+                      />
+                      <span className="text-[10px] font-bold uppercase">{p.replace(/_/g, " ")}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
                 <label className="flex items-center gap-3 cursor-pointer">

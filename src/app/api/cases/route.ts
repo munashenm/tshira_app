@@ -2,18 +2,18 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Province, Role } from "@prisma/client";
 import { requireActor, requireRoles } from "@/lib/authz";
+import { provinceWhereClause } from "@/lib/provinces";
 
 export async function GET(request: Request) {
   try {
     const auth = await requireActor(request);
     if (!auth.ok) return auth.response;
 
-    const whereClause: any = {};
-    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province) {
-      whereClause.province = auth.context.actor.province;
-    } else if (auth.context.actor.role === Role.DATA_COLLECTION_OFFICER && auth.context.actor.province) {
-      whereClause.province = auth.context.actor.province;
-    }
+    const actorWithProvinces = await prisma.user.findUnique({
+      where: { id: auth.context.actor.id },
+      select: { role: true, province: true, provinceAssignments: { select: { province: true } } },
+    });
+    const whereClause: any = actorWithProvinces ? provinceWhereClause(actorWithProvinces) : {};
 
     const cases = await prisma.case.findMany({
       where: whereClause,
@@ -44,6 +44,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const nydaReference = formData.get("nydaReference") as string;
+    const voucherAppNumber = (formData.get("voucherAppNumber") as string) || nydaReference;
     const clientName = formData.get("clientName") as string;
     const province = formData.get("province") as Province;
     const outputType = formData.get("outputType") as string;
@@ -76,11 +77,23 @@ export async function POST(request: Request) {
           province
         }
       });
+    } else {
+      client = await prisma.client.update({
+        where: { id: client.id },
+        data: {
+          name: clientName,
+          phone: phone || client.phone,
+          email: email || client.email,
+          address: address || client.address,
+          province,
+        },
+      });
     }
 
     const newCase = await prisma.case.create({
       data: {
         nydaReference,
+        voucherAppNumber,
         clientName,
         beneficiaryDetails,
         province,

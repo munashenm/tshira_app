@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Province } from "@prisma/client";
 import { 
   Plus, 
   Search, 
@@ -24,10 +25,17 @@ interface Expense {
   category: string;
   description: string;
   status: string;
+  province?: string;
+  paymentMethod?: string;
+  receiptUrl?: string | null;
   createdAt: string;
   case?: { clientName: string; nydaReference: string };
   user: { name: string };
+  coordinator?: { name: string } | null;
+  dco?: { name: string } | null;
 }
+
+const EXPENSE_CATEGORIES = ["ALL", "TRAVEL", "MEALS", "PRINTING", "OFFICE", "ACCOMMODATION", "ENTERTAINMENT", "AIRTIME_DATA"];
 
 export default function ExpensesPage() {
   const { currentPersona } = useSimulation();
@@ -134,7 +142,7 @@ export default function ExpensesPage() {
           />
         </div>
         <div className="bg-white dark:bg-zinc-900 p-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex gap-2">
-          {["ALL", "TRAVEL", "MEALS", "PRINTING", "OFFICE"].map(cat => (
+          {EXPENSE_CATEGORIES.map(cat => (
             <button 
               key={cat}
               onClick={() => setFilter(cat)}
@@ -153,13 +161,14 @@ export default function ExpensesPage() {
             <tr className="bg-zinc-50/50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
               <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Date / Description</th>
               <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Category</th>
-              <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Requested By</th>
+              <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Province / Team</th>
+              <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Payment</th>
               <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount</th>
               <th className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
-            {expenses.map((e) => (
+            {expenses.filter(e => filter === "ALL" || e.category === filter).map((e) => (
               <tr key={e.id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                 <td className="px-8 py-6">
                   <div className="flex items-center gap-4">
@@ -169,6 +178,11 @@ export default function ExpensesPage() {
                     <div>
                       <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{e.description}</p>
                       <p className="text-xs text-zinc-400 mt-0.5">{new Date(e.createdAt).toLocaleDateString("en-ZA", { dateStyle: "long" })}</p>
+                      {e.receiptUrl && (
+                        <a href={e.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-600 hover:underline mt-1 inline-block">
+                          View Receipt
+                        </a>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -176,12 +190,15 @@ export default function ExpensesPage() {
                   <span className="text-[10px] font-black px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg uppercase">{e.category}</span>
                 </td>
                 <td className="px-8 py-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-black">
-                      {e.user.name.charAt(0)}
-                    </div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{e.user.name}</p>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-blue-600 uppercase">{e.province?.replace(/_/g, " ") || "—"}</p>
+                    <p className="text-xs text-zinc-500">PC: {e.coordinator?.name || "—"}</p>
+                    <p className="text-xs text-zinc-500">DCO: {e.dco?.name || "—"}</p>
+                    <p className="text-xs text-zinc-400">By: {e.user.name}</p>
                   </div>
+                </td>
+                <td className="px-8 py-6">
+                  <span className="text-[10px] font-black px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg uppercase">{e.paymentMethod?.replace(/_/g, " ") || "—"}</span>
                 </td>
                 <td className="px-8 py-6">
                   <p className="text-sm font-black text-zinc-900 dark:text-zinc-50">R {e.amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</p>
@@ -219,7 +236,7 @@ export default function ExpensesPage() {
             ))}
             {expenses.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-32 text-center">
+                <td colSpan={6} className="py-32 text-center">
                   <DollarSign className="w-12 h-12 text-zinc-200 mx-auto mb-4" />
                   <p className="text-zinc-500 font-medium">No expenses logged yet.</p>
                 </td>
@@ -242,25 +259,45 @@ export default function ExpensesPage() {
 function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { currentPersona } = useSimulation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [receiptName, setReceiptName] = useState("");
+  const [coordinators, setCoordinators] = useState<{ id: string; name: string | null }[]>([]);
+  const [dcos, setDcos] = useState<{ id: string; name: string | null }[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string>(currentPersona?.province || "LIMPOPO");
+
+  useEffect(() => {
+    const loadTeam = async () => {
+      const [pcRes, dcoRes] = await Promise.all([
+        fetch(`/api/users?role=PROVINCIAL_COORDINATOR&province=${selectedProvince}`),
+        fetch(`/api/users?role=DATA_COLLECTION_OFFICER&province=${selectedProvince}`),
+      ]);
+      if (pcRes.ok) setCoordinators(await pcRes.json());
+      if (dcoRes.ok) setDcos(await dcoRes.json());
+    };
+    void loadTeam();
+  }, [selectedProvince]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
-    const data = {
-      amount: parseFloat(formData.get("amount") as string),
-      category: formData.get("category"),
-      description: formData.get("description"),
-      userId: currentPersona?.id,
-    };
+    const receipt = formData.get("receipt") as File | null;
+    if (!receipt?.size) {
+      alert("Please attach a receipt or proof of payment.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/expenses", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
       });
-      if (res.ok) onSuccess();
+      if (res.ok) {
+        onSuccess();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to submit expense.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -282,12 +319,58 @@ function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuc
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-4">
             <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Province</label>
+              <select
+                name="province"
+                required
+                value={selectedProvince}
+                onChange={(e) => setSelectedProvince(e.target.value)}
+                className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                {Object.values(Province).map((p) => (
+                  <option key={p} value={p}>{p.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Provincial Coordinator</label>
+                <select name="coordinatorId" className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">Select PC...</option>
+                  {coordinators.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Data Collection Officer</label>
+                <select name="dcoId" className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">Select DCO...</option>
+                  {dcos.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Category</label>
               <select name="category" required className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="TRAVEL">Travel / Fuel</option>
                 <option value="MEALS">Meals / Subsistence</option>
                 <option value="PRINTING">Printing / Stationery</option>
                 <option value="OFFICE">Office Supplies</option>
+                <option value="ACCOMMODATION">Accommodation</option>
+                <option value="ENTERTAINMENT">Entertainment</option>
+                <option value="AIRTIME_DATA">Airtime / Data</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Method of Payment</label>
+              <select name="paymentMethod" required className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="CASH">Cash</option>
+                <option value="EFT">EFT / Bank Transfer</option>
+                <option value="CARD">Personal Card</option>
+                <option value="COMPANY_CARD">Company Card</option>
               </select>
             </div>
             <div>
@@ -298,9 +381,20 @@ function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuc
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Description</label>
               <textarea name="description" required placeholder="Describe the reason for this expense..." className="w-full mt-2 bg-zinc-50 dark:bg-zinc-800 border-none rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]" />
             </div>
-            <div className="p-6 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[24px] text-center group hover:border-blue-500 transition-all cursor-pointer">
-              <Camera className="w-8 h-8 text-zinc-200 group-hover:text-blue-500 mx-auto mb-2 transition-colors" />
-              <p className="text-xs font-bold text-zinc-400">Attach Receipt / Proof of Payment</p>
+            <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Receipt / Proof of Payment *</label>
+              <label className="mt-2 flex flex-col items-center p-6 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[24px] text-center group hover:border-blue-500 transition-all cursor-pointer">
+                <Camera className="w-8 h-8 text-zinc-200 group-hover:text-blue-500 mb-2 transition-colors" />
+                <p className="text-xs font-bold text-zinc-400">{receiptName || "Click to attach receipt (PDF, JPG, PNG)"}</p>
+                <input
+                  type="file"
+                  name="receipt"
+                  required
+                  accept="image/*,.pdf"
+                  className="sr-only"
+                  onChange={(ev) => setReceiptName(ev.target.files?.[0]?.name || "")}
+                />
+              </label>
             </div>
           </div>
 

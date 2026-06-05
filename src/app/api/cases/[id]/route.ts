@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { CaseStatus, Role } from "@prisma/client";
 import { sendNotification, notificationTemplates } from "@/lib/notifications";
 import { requireActor, requireRoles, validateAssignmentPermission, validateStatusTransition } from "@/lib/authz";
+import { canAccessProvince } from "@/lib/provinces";
 
 export async function GET(
   request: Request,
@@ -73,8 +74,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR && auth.context.actor.province !== targetCase.province) {
-      return NextResponse.json({ error: "Forbidden: coordinator can only update cases in their province." }, { status: 403 });
+    if (auth.context.actor.role === Role.PROVINCIAL_COORDINATOR) {
+      const actorUser = await prisma.user.findUnique({
+        where: { id: auth.context.actor.id },
+        select: { role: true, province: true, provinceAssignments: { select: { province: true } } },
+      });
+      if (actorUser && !canAccessProvince(actorUser, targetCase.province)) {
+        return NextResponse.json({ error: "Forbidden: coordinator can only update cases in their assigned provinces." }, { status: 403 });
+      }
     }
 
     const assignmentFields: Array<"coordinatorId" | "dcoId" | "consultantId" | "reviewerId"> = [];
