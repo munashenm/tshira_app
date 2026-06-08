@@ -76,8 +76,8 @@ export default function AddUserModal() {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
-        <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg max-h-[90vh] flex flex-col rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+        <div className="shrink-0 px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
           <div>
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Add Team Member</h2>
             <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">Create New System User</p>
@@ -87,7 +87,8 @@ export default function AddUserModal() {
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="overflow-y-auto p-8 space-y-5">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Full Name</label>
             <div className="relative">
@@ -222,8 +223,9 @@ export default function AddUserModal() {
               </div>
             </div>
           </div>
+          </div>
 
-          <div className="pt-4 flex gap-4">
+          <div className="shrink-0 px-8 py-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 flex gap-4">
             <button 
               type="submit" 
               disabled={isSubmitting}
