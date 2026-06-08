@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Shield, MapPin, Save, Key, CheckCircle2, AlertTriangle, Settings, User, Mail, History, Activity } from "lucide-react";
 import { Role, Province } from "@prisma/client";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,12 @@ export default function EditUserModal({ user }: { user: any }) {
   const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +105,9 @@ export default function EditUserModal({ user }: { user: any }) {
     );
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
       <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
@@ -381,6 +389,7 @@ export default function EditUserModal({ user }: { user: any }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
