@@ -62,8 +62,8 @@ export default function CreateClientModal({ provinces }: { provinces: string[] }
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-xl rounded-[32px] overflow-hidden shadow-2xl border border-zinc-100 dark:border-zinc-800 animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-xl max-h-[90vh] flex flex-col rounded-[32px] overflow-hidden shadow-2xl border border-zinc-100 dark:border-zinc-800 animate-in zoom-in-95 duration-300">
+            <div className="shrink-0 px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
               <div>
                 <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
                   <UserPlus className="w-6 h-6 text-blue-600" />
@@ -76,7 +76,8 @@ export default function CreateClientModal({ provinces }: { provinces: string[] }
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+              <div className="overflow-y-auto p-8 space-y-6">
               {error && (
                 <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
@@ -165,8 +166,9 @@ export default function CreateClientModal({ provinces }: { provinces: string[] }
                   </div>
                 </div>
               </div>
+              </div>
 
-              <div className="pt-4 flex justify-end gap-3">
+              <div className="shrink-0 px-8 py-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsOpen(false)} className="px-6 py-3 rounded-xl text-sm font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all">
                   Cancel
                 </button>

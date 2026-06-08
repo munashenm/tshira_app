@@ -122,8 +122,8 @@ export default function ReviewModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
-        <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+        <div className="shrink-0 px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
           <div>
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Quality Assurance Review</h2>
             <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">
@@ -135,7 +135,7 @@ export default function ReviewModal({
           </button>
         </div>
         
-        <div className="p-8 space-y-8">
+        <div className="p-8 space-y-8 overflow-y-auto">
           {/* Checklist Section */}
           <div className="space-y-4">
             <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">

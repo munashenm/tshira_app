@@ -305,8 +305,8 @@ function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuc
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
-        <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg max-h-[90vh] flex flex-col rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+        <div className="shrink-0 px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
           <div>
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Log Expense</h2>
             <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">Requested by {currentPersona?.name}</p>
@@ -316,8 +316,8 @@ function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuc
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="space-y-4 overflow-y-auto p-8">
             <div>
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Province</label>
               <select
@@ -398,7 +398,7 @@ function CreateExpenseModal({ onClose, onSuccess }: { onClose: () => void; onSuc
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="shrink-0 flex gap-4 px-8 py-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50">
             <button type="button" onClick={onClose} className="flex-1 py-4 text-sm font-bold text-zinc-500 hover:text-zinc-900">Cancel</button>
             <button 
               type="submit" 

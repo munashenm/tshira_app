@@ -30,12 +30,14 @@ export default function UserAssignmentModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const router = useRouter();
   const { currentPersona } = useSimulation();
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
+      setSearch("");
       fetchUsers();
     }
   }, [isOpen]);
@@ -113,6 +115,15 @@ export default function UserAssignmentModal({
 
   const allowed = canAssign();
 
+  const filteredUsers = users.filter((u) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (u.name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q)
+    );
+  });
+
   if (!isOpen) {
     return (
       <button 
@@ -151,6 +162,8 @@ export default function UserAssignmentModal({
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search team members..." 
               className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
@@ -159,10 +172,12 @@ export default function UserAssignmentModal({
           <div className="space-y-2 max-h-[40vh] overflow-y-auto">
             {isLoading ? (
               <p className="text-center py-8 text-zinc-400">Finding available team members...</p>
-            ) : users.length === 0 ? (
-              <p className="text-center py-8 text-zinc-400">No users found with this role.</p>
+            ) : filteredUsers.length === 0 ? (
+              <p className="text-center py-8 text-zinc-400">
+                {users.length === 0 ? "No users found with this role." : "No team members match your search."}
+              </p>
             ) : (
-              users.map((u) => (
+              filteredUsers.map((u) => (
                 <button
                   key={u.id}
                   disabled={isSubmitting}

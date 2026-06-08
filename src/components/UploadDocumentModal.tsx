@@ -75,15 +75,15 @@ export default function UploadDocumentModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
-        <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+        <div className="shrink-0 px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-800/50">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Upload Project Document</h2>
           <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
             <X className="w-5 h-5 text-zinc-400" />
           </button>
         </div>
         
-        <form onSubmit={handleUpload} className="p-8 space-y-6">
+        <form onSubmit={handleUpload} className="p-8 space-y-6 overflow-y-auto">
           <div className="space-y-2">
             <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Document Type</label>
             <select 
