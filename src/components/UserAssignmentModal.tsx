@@ -29,11 +29,13 @@ export default function UserAssignmentModal({
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { currentPersona } = useSimulation();
 
   useEffect(() => {
     if (isOpen) {
+      setError(null);
       fetchUsers();
     }
   }, [isOpen]);
@@ -57,6 +59,7 @@ export default function UserAssignmentModal({
 
   const handleAssign = async (userId: string) => {
     setIsSubmitting(true);
+    setError(null);
     const fieldMap: Partial<Record<Role, string>> = {
       PROVINCIAL_COORDINATOR: "coordinatorId",
       DATA_COLLECTION_OFFICER: "dcoId",
@@ -81,9 +84,13 @@ export default function UserAssignmentModal({
       if (res.ok) {
         setIsOpen(false);
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || "Failed to assign team member. Please try again.");
       }
     } catch (error) {
       console.error(error);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,6 +143,11 @@ export default function UserAssignmentModal({
         </div>
         
         <div className="p-8 space-y-4">
+          {error && (
+            <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/40 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input 

@@ -8,7 +8,7 @@ export interface AuthContext {
 }
 
 const ROLE_ASSIGNMENT_RULES: Partial<Record<Role, Array<"coordinatorId" | "dcoId" | "consultantId" | "reviewerId">>> = {
-  ADMIN_OFFICER: ["coordinatorId", "consultantId", "reviewerId"],
+  ADMIN_OFFICER: ["coordinatorId", "dcoId", "consultantId", "reviewerId"],
   PROVINCIAL_COORDINATOR: ["dcoId"],
 };
 
